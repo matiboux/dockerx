@@ -7,3 +7,44 @@
 # Copyright (c) 2024 Matiboux
 
 VERSION="0.1.0"
+
+# Default options
+PRINT_HELP=false
+PRINT_VERSION=false
+UPDATE=false
+DRY_RUN=false
+QUIET=false
+
+# Parse options
+while true; do
+	case "$1" in
+		'--help' | '-h' )
+			# Print help
+			PRINT_HELP=true
+			shift
+			;;
+		'--version' | '-v' )
+			# Print version
+			PRINT_VERSION=true
+			shift
+			;;
+		'--update')
+			# Update DockerX
+			UPDATE=true
+			shift
+			;;
+		'-n')
+			# Dry run, print docker command without running it
+			DRY_RUN=true
+			shift
+			;;
+		'-q')
+			# Quiet, do not print docker command
+			QUIET=true
+			shift
+			;;
+		*)
+			break
+			;;
+	esac
+done

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# DockerX (v0.1.0)
+# Wrapper for running docker programs & docker shell environments.
+# https://github.com/matiboux/dockerx
+# MIT License
+# Copyright (c) 2024 Matiboux
+
+VERSION="0.1.0"

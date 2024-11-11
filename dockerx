@@ -79,3 +79,46 @@ if [ "$PRINT_HELP" = true ]; then
 	echo '    $, @sh  Run a `sh` shell in the container'
 	exit 0
 fi
+
+# Function to get latest version
+get_latest_version() {
+	# Syntax: '"tag_name": "v1.0.0",'
+	LATEST_VERSION_JSON=$(
+		curl -fsSL "https://api.github.com/repos/matiboux/dockerx/releases/latest" 2>/dev/null \
+		| grep -Eo '"tag_name": "(.+?)",'
+	)
+
+	if [ -n "$LATEST_VERSION_JSON" ]; then
+		if [ "$(uname -s)" = 'Darwin' ]; then
+			# MacOS
+			LATEST_VERSION="${LATEST_VERSION_JSON:14:$((${#LATEST_VERSION_JSON}-14-2))}"
+		else
+			# Linux
+			LATEST_VERSION=$(expr substr "$LATEST_VERSION_JSON" $(expr 1 + 14) $(expr length "$LATEST_VERSION_JSON" - 14 - 2))
+		fi
+
+		echo "$LATEST_VERSION"
+	fi
+}
+
+if [ "$PRINT_VERSION" = true ]; then
+
+	# Print version and exit
+	if [ "$QUIET" = false ]; then
+		echo "DockerX (v$VERSION) - https://github.com/matiboux/dockerx"
+
+		if [ "$DRY_RUN" = false ]; then
+			LATEST_VERSION=$(get_latest_version)
+			if [ -z "$LATEST_VERSION" ]; then
+				echo 'Warning: Could not determine latest version.'
+			elif [ "$VERSION" != "$LATEST_VERSION" ]; then
+				echo "Notice: DockerX is not up to date, latest version is $LATEST_VERSION!"
+			fi
+		fi
+
+	else
+		echo "v$VERSION"
+	fi
+
+	exit 0
+fi

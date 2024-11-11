@@ -237,3 +237,14 @@ if [ "$CONTEXT_SET" = true ]; then
 
 	exit 0
 fi
+
+# Get image
+if [ $# -eq 0 ]; then
+	echo 'Error: No image specified'
+	exit 1
+fi
+
+IMAGE="$1"
+shift
+
+echo "TODO: Run docker image '$IMAGE' in context '$CONTEXT_PATH' with options: $@"

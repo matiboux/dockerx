@@ -12,6 +12,9 @@ VERSION="0.1.0"
 PRINT_HELP=false
 PRINT_VERSION=false
 UPDATE=false
+CONTEXT_GET=false
+CONTEXT_SET=false
+CONTEXT_NEW_PATH=''
 DRY_RUN=false
 QUIET=false
 
@@ -31,6 +34,26 @@ while true; do
 		'--update')
 			# Update DockerX
 			UPDATE=true
+			shift
+			;;
+		'--get-context' | '-g' | '-c')
+			# Get context path
+			CONTEXT_GET=true
+			shift
+			;;
+		'--set-context' | '-s' | '-C')
+			# Set context path
+			CONTEXT_SET=true
+			shift
+			if [ $# -gt 0 ] && [ "$(echo "$1" | cut -c1)" != '-' ]; then
+				CONTEXT_NEW_PATH="$1"
+				shift
+			fi
+			;;
+		'--reset-context' | '-r')
+			# Unset context path
+			CONTEXT_SET=true
+			CONTEXT_NEW_PATH='null'
 			shift
 			;;
 		'-n')
@@ -69,10 +92,12 @@ if [ "$PRINT_HELP" = true ]; then
 	echo ''
 	echo 'Arguments details:'
 	echo '  options:'
-	echo '    -h, --help         Print this help and exit'
-	echo '    -v, --version      Print version and exit'
-	echo '    --update           Update DockerX and exit'
-	echo '    -c, --set-context  Set the DockerX context directory'
+	echo '    -h, --help           Print this help and exit'
+	echo '    -v, --version        Print version and exit'
+	echo '    --update             Update DockerX and exit'
+	echo '    -g, --get-context    Get the DockerX context path'
+	echo '    -c, --set-context    Set the DockerX context path'
+	echo '    -r, --reset-context  Unset the DockerX context path'
 	echo '    -n             Dry run, print docker command without running it'
 	echo '    -q             Quiet, do not print docker command'
 	echo '  @preset: One of the following:'
@@ -127,4 +152,88 @@ if [ "$UPDATE" = true ]; then
 	# Update DockerX and exit
 	echo 'Error: Update not implemented yet.'
 	exit 1
+fi
+
+# Get saved context path
+if [ -n "$DOCKERX_CONTEXT_PATH" ]; then
+	CONTEXT_PATH_SOURCE='ENV'
+	CONTEXT_PATH="$DOCKERX_CONTEXT_PATH"
+elif [ -n "$CONTEXT_PATH" ]; then
+	CONTEXT_PATH_SOURCE='ENV'
+	CONTEXT_PATH="$CONTEXT_PATH"
+elif [ -f ~/.dockerx ]; then
+	CONTEXT_PATH_SOURCE='FILE'
+	CONTEXT_PATH="$(cat ~/.dockerx)"
+fi
+
+if [ ! -d "$CONTEXT_PATH" ]; then
+	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
+		echo "Error: Context path '$CONTEXT_PATH' not found"
+		exit 1
+	fi
+
+	if [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
+		echo "Warning: Context path '$CONTEXT_PATH' not found, using current directory"
+	fi
+
+	COMPOSE_FILE_SOURCE='DEFAULT'
+	CONTEXT_PATH="$(pwd)"
+fi
+
+if [ "$CONTEXT_GET" = true ]; then
+	# Get context path and exit
+
+	if [ -z "$CONTEXT_PATH" ]; then
+		echo 'Error: Context path not set'
+		exit 1
+	fi
+
+	echo "$CONTEXT_PATH"
+
+	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
+		echo '(from environment variable)'
+	elif [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
+		echo '(from ~/.dockerx file)'
+	fi
+
+	exit 0
+fi
+
+if [ "$CONTEXT_SET" = true ]; then
+	# Set context path and exit
+
+	if [ "$CONTEXT_NEW_PATH" = 'null' ]; then
+		# Unset context path
+		rm ~/.dockerx 2>/dev/null
+		echo 'Context path unset'
+		exit 0
+	fi
+
+	if [ -z "$CONTEXT_NEW_PATH" ]; then
+		# Use current directory as context
+		CONTEXT_NEW_PATH="$(pwd)"
+	fi
+
+	if [ ! -d "$CONTEXT_NEW_PATH" ]; then
+		if [ -f "$CONTEXT_NEW_PATH" ]; then
+			# Use parent directory as context
+			echo "Warning: Using parent directory of '$CONTEXT_NEW_PATH' as context"
+			CONTEXT_NEW_PATH=$(dirname "$CONTEXT_NEW_PATH")
+		else
+			echo "Error: Directory '$CONTEXT_NEW_PATH' not found"
+			exit 1
+		fi
+	fi
+
+	# Use absolute path
+	CONTEXT_NEW_PATH=$(cd "$CONTEXT_NEW_PATH" && pwd)
+
+	# Save context path
+	echo "$CONTEXT_NEW_PATH" > ~/.dockerx
+
+	# Print context path
+	echo "Context path set to: '$CONTEXT_NEW_PATH'"
+	echo "(saved in ~/.dockerx)"
+
+	exit 0
 fi

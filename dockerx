@@ -122,3 +122,9 @@ if [ "$PRINT_VERSION" = true ]; then
 
 	exit 0
 fi
+
+if [ "$UPDATE" = true ]; then
+	# Update DockerX and exit
+	echo 'Error: Update not implemented yet.'
+	exit 1
+fi

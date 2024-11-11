@@ -31,17 +31,17 @@ while true; do
 			PRINT_VERSION=true
 			shift
 			;;
-		'--update')
+		'--update' )
 			# Update DockerX
 			UPDATE=true
 			shift
 			;;
-		'--get-context' | '-g' | '-c')
+		'--get-context' | '-g' | '-c' )
 			# Get context path
 			CONTEXT_GET=true
 			shift
 			;;
-		'--set-context' | '-s' | '-C')
+		'--set-context' | '-s' | '-C' )
 			# Set context path
 			CONTEXT_SET=true
 			shift
@@ -50,23 +50,23 @@ while true; do
 				shift
 			fi
 			;;
-		'--reset-context' | '-r')
+		'--reset-context' | '-r' )
 			# Unset context path
 			CONTEXT_SET=true
 			CONTEXT_NEW_PATH='null'
 			shift
 			;;
-		'-n')
+		'--dry-run' | '-n' )
 			# Dry run, print docker command without running it
 			DRY_RUN=true
 			shift
 			;;
-		'-q')
+		'--quiet' | '-q' )
 			# Quiet, do not print docker command
 			QUIET=true
 			shift
 			;;
-		*)
+		* )
 			break
 			;;
 	esac
@@ -98,8 +98,8 @@ if [ "$PRINT_HELP" = true ]; then
 	echo '    -g, --get-context    Get the DockerX context path'
 	echo '    -c, --set-context    Set the DockerX context path'
 	echo '    -r, --reset-context  Unset the DockerX context path'
-	echo '    -n             Dry run, print docker command without running it'
-	echo '    -q             Quiet, do not print docker command'
+	echo '    -n, --dry-run        Dry run, print docker command without running it'
+	echo '    -q, --quiet          Quiet, do not print docker command'
 	echo '  @preset: One of the following:'
 	echo '    $, @sh  Run a `sh` shell in the container'
 	exit 0

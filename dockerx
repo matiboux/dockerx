@@ -176,7 +176,7 @@ if [ ! -d "$CONTEXT_PATH" ]; then
 		echo "Warning: Context path '$CONTEXT_PATH' not found, using current directory"
 	fi
 
-	COMPOSE_FILE_SOURCE='DEFAULT'
+	CONTEXT_PATH_SOURCE='DEFAULT'
 	CONTEXT_PATH="$(pwd)"
 fi
 

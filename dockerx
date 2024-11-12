@@ -193,7 +193,7 @@ if [ "$CONTEXT_GET" = true ]; then
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
 		echo '(from environment variable)'
 	elif [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
-		echo '(from ~/.dockerx file)'
+		echo '(from .dockerx file)'
 	fi
 
 	exit 0

@@ -287,8 +287,14 @@ if [ $# -gt 0 ]; then
 		COMMAND_PRESET="@sh"
 		shift
 	elif [ "$(echo "$1" | cut -c1)" = '@' ]; then
-		COMMAND_PRESET="$1"
-		shift
+		if [ "$(echo "$1" | cut -c2)" = '@' ]; then
+			# Escape command preset
+			COMMAND="${1#?}"
+			shift
+		else
+			COMMAND_PRESET="$1"
+			shift
+		fi
 	fi
 
 	if [ -n "$COMMAND_PRESET" ]; then
@@ -308,8 +314,10 @@ if [ $# -gt 0 ]; then
 	fi
 fi
 
-# Add leading space
-COMMAND=" $COMMAND"
+if [ -n "$COMMAND" ]; then
+	# Add leading space
+	COMMAND=" $COMMAND"
+fi
 
 # Get arguments
 ARGS=''

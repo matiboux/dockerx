@@ -259,7 +259,7 @@ DOCKER_IMAGE="$1"
 shift
 
 # Get docker options
-DOCKER_OPTIONS="-v $CONTEXT_PATH:/app"
+DOCKER_OPTIONS="-it -v $CONTEXT_PATH:/app"
 DOCKER_OPTIONS_COUNT=0
 FOUND_DOCKER_OPTIONS=false
 if [ $# -gt 0 ]; then

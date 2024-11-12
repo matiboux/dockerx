@@ -23,6 +23,17 @@ def test_ubuntu(file = __file__):
 			),
 		)
 
+def test_nginx(file = __file__):
+	with TestDirContext(file) as ctx:
+		dockerx = ctx.run_dockerx(
+			'-n', 'nginx',
+		)
+		dockerx.assert_context_ok(
+			format_dockerx_stdout(
+				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir nginx',
+			),
+		)
+
 def test_python(file = __file__):
 	with TestDirContext(file) as ctx:
 		dockerx = ctx.run_dockerx(
@@ -34,13 +45,13 @@ def test_python(file = __file__):
 			),
 		)
 
-def test_nginx(file = __file__):
+def test_node(file = __file__):
 	with TestDirContext(file) as ctx:
 		dockerx = ctx.run_dockerx(
-			'-n', 'nginx',
+			'-n', 'node',
 		)
 		dockerx.assert_context_ok(
 			format_dockerx_stdout(
-				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir nginx',
+				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir node',
 			),
 		)

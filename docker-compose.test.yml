@@ -1,0 +1,12 @@
+# Services overrides for testing
+
+services:
+
+  app:
+    # Build override
+    image: ${IMAGES_PREFIX:-app}-test:${DOCKER_TAG:-latest}
+    build:
+      target: app_test
+    # Deploy override
+    environment:
+      COVERAGE_THRESHOLD: ${COVERAGE_THRESHOLD:-}

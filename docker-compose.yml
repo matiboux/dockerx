@@ -1,0 +1,12 @@
+#:dockerc.abstract
+# Services definition for building & deploying
+
+services:
+
+  app:
+    # Build
+    image: ${IMAGES_PREFIX:-app}:${DOCKER_TAG:-latest}
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+      target: app_base

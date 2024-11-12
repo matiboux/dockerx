@@ -1,0 +1,92 @@
+name: Check CI
+
+on:
+
+  # Run on pull requests to primary branches
+  pull_request:
+    branches:
+      - master
+      - main
+      - prod
+      - production
+      - staging
+      - dev
+      - develop
+      - development
+      - test
+    paths:
+      - '.github/workflows/check.yml'
+      - 'dockerx'
+      - 'test/**'
+      - 'docker-compose.yml'
+      - 'docker-compose.test.yml'
+
+  # Run on manual triggers
+  workflow_dispatch:
+
+# Set GITHUB_TOKEN permissions for the workflow
+permissions:
+  contents: read
+
+# Set workflow concurrency rules
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # Test job
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build docker images for testing
+        run: |
+          # docker compose build
+          docker compose \
+            -f ./docker-compose.yml -f ./docker-compose.test.yml \
+            --env-file .env \
+            build
+
+      - name: Run docker images for testing
+        run: |
+          # docker compose up
+
+          echo "::group::Run tests"
+
+          docker compose \
+            -f ./docker-compose.yml -f ./docker-compose.test.yml \
+            --env-file .env \
+            up
+
+          echo "::endgroup::"
+
+          echo '::group::Check tests success'
+
+          # Check services for non-zero exit codes
+          NON_ZERO_EXIT_CODES=$(
+            docker compose \
+              -f ./docker-compose.yml -f ./docker-compose.test.yml \
+              --env-file .env \
+              ps -a --format '{{.ExitCode}}' \
+            | grep -v '^0$' \
+            || true
+          )
+          if [ -n "${NON_ZERO_EXIT_CODES}" ]; then
+            # Non-zero exit code found
+            echo ''
+            echo 'Non-zero exit codes found.'
+            docker compose \
+              -f ./docker-compose.yml -f ./docker-compose.test.yml \
+              --env-file .env \
+              ps -a
+            exit 1
+          fi
+
+          echo '::endgroup::'

@@ -32,8 +32,8 @@ def test_echo_single_quote(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
-				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'\'\'',
+			format_dockerx_stdout(
+				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'\'"\'"\'\'',
 			),
 		)
 

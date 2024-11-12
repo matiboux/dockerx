@@ -154,6 +154,17 @@ if [ "$UPDATE" = true ]; then
 	exit 1
 fi
 
+# Get dockerx context path file
+if [ -n "$DOCKERX_CONTEXT_FILE" ]; then
+	CONTEXT_FILE="$DOCKERX_CONTEXT_FILE"
+elif [ -n "$CONTEXT_FILE" ]; then
+	CONTEXT_FILE="$CONTEXT_FILE"
+elif [ -n "$HOME" ]; then
+	CONTEXT_FILE="$HOME/.dockerx"
+else
+	CONTEXT_FILE='~/.dockerx'
+fi
+
 # Get saved context path
 if [ -n "$DOCKERX_CONTEXT_PATH" ]; then
 	CONTEXT_PATH_SOURCE='ENV'
@@ -161,9 +172,9 @@ if [ -n "$DOCKERX_CONTEXT_PATH" ]; then
 elif [ -n "$CONTEXT_PATH" ]; then
 	CONTEXT_PATH_SOURCE='ENV'
 	CONTEXT_PATH="$CONTEXT_PATH"
-elif [ -f ~/.dockerx ]; then
+elif [ -f "$CONTEXT_FILE" ]; then
 	CONTEXT_PATH_SOURCE='FILE'
-	CONTEXT_PATH="$(cat ~/.dockerx)"
+	CONTEXT_PATH="$(cat "$CONTEXT_FILE")"
 fi
 
 if [ ! -d "$CONTEXT_PATH" ]; then
@@ -204,7 +215,7 @@ if [ "$CONTEXT_SET" = true ]; then
 
 	if [ "$CONTEXT_NEW_PATH" = 'null' ]; then
 		# Unset context path
-		rm ~/.dockerx 2>/dev/null
+		rm "$CONTEXT_FILE" 2>/dev/null
 		echo 'Context path unset'
 		exit 0
 	fi

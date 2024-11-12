@@ -246,16 +246,46 @@ fi
 
 DOCKER_IMAGE="$1"
 shift
+
+# Get docker options
+DOCKER_OPTIONS=''
+DOCKER_OPTIONS_COUNT=''
+FOUND_DOCKER_OPTIONS=false
+if [ $# -gt 0 ]; then
+	for ARG in "$@"; do
+		if [ "$ARG" = '--' ]; then
+			FOUND_DOCKER_OPTIONS=true
+			break
+		fi
+
+		DOCKER_OPTIONS="$DOCKER_OPTIONS '$ARG'"
+		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT + 1))
+	done
+fi
+
+if [ "$FOUND_DOCKER_OPTIONS" = true ]; then
+	# Remove leading space
+	DOCKER_OPTIONS="${DOCKER_OPTIONS:1}"
+	while [ $DOCKER_OPTIONS_COUNT -gt 0 ]; do
+		# Remove docker options
+		shift
+		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT - 1))
+	done
+	# Remove '--'
+	shift
+fi
+
+# Get command
 ARGS="$@"
 
 if [ "$QUIET" = false ]; then
 	# Print docker command
 	echo ''
-	echo "> docker run -v "$CONTEXT_PATH:/app" $DOCKER_IMAGE $ARGS"
+	echo "> docker run -v "$CONTEXT_PATH:/app" $DOCKER_OPTIONS $DOCKER_IMAGE $ARGS"
 	echo ''
 fi
 
 if [ "$DRY_RUN" = false ]; then
 	# Run docker command
-	exec docker run -v "$CONTEXT_PATH:/app" $DOCKER_IMAGE $ARGS
+	exec docker run -v "$CONTEXT_PATH:/app" $DOCKER_OPTIONS $DOCKER_IMAGE $ARGS
 fi

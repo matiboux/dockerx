@@ -259,7 +259,7 @@ DOCKER_IMAGE="$1"
 shift
 
 # Get docker options
-DOCKER_OPTIONS=''
+DOCKER_OPTIONS="-v $CONTEXT_PATH:/app"
 DOCKER_OPTIONS_COUNT=0
 FOUND_DOCKER_OPTIONS=false
 if [ $# -gt 0 ]; then
@@ -351,11 +351,11 @@ fi
 if [ "$QUIET" = false ]; then
 	# Print docker command
 	echo ''
-	echo "> docker run -v "$CONTEXT_PATH:/app"$DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
+	echo "> docker run $DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
 	echo ''
 fi
 
 if [ "$DRY_RUN" = false ]; then
 	# Run docker command
-	exec docker run -v "$CONTEXT_PATH:/app"$DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS
+	exec docker run $DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS
 fi

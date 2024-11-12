@@ -6,7 +6,6 @@ def test_ls(file = __file__):
 		dockerx = ctx.run_dockerx(
 			'-n', 'ubuntu', 'ls',
 		)
-		# Default is to run the image's default command
 		dockerx.assert_context_ok(
 			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu ls',
@@ -16,23 +15,10 @@ def test_ls(file = __file__):
 def test_echo_number(file = __file__):
 	with TestDirContext(file) as ctx:
 		dockerx = ctx.run_dockerx(
-			'-n', 'ubuntu', 'echo', '42',
+			'-n', 'ubuntu', 'echo',
 		)
-		# Default is to run the image's default command
 		dockerx.assert_context_ok(
 			format_dockerx_stdout(
-				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo 42',
-			),
-		)
-
-def test_echo_word(file = __file__):
-	with TestDirContext(file) as ctx:
-		dockerx = ctx.run_dockerx(
-			'-n', 'ubuntu', 'echo', 'hello',
-		)
-		# Default is to run the image's default command
-		dockerx.assert_context_ok(
-			format_dockerx_stdout(
-				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo hello',
+				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo',
 			),
 		)

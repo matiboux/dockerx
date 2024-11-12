@@ -47,15 +47,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build docker images for testing
-        run: docker compose -f ./docker-compose.yml -f ./docker-compose.test.yml build
+        run: |
+          # docker compose build
+          docker compose \
+            -f ./docker-compose.yml -f ./docker-compose.test.yml \
+            --env-file .env \
+            build
 
       - name: Run docker images for testing
         run: |
+          # docker compose up
+
           echo "::group::Run tests"
 
           docker compose \
             -f ./docker-compose.yml -f ./docker-compose.test.yml \
-            --env-file .env --env-file .env.test \
+            --env-file .env \
             up
 
           echo "::endgroup::"
@@ -66,6 +73,7 @@ jobs:
           NON_ZERO_EXIT_CODES=$(
             docker compose \
               -f ./docker-compose.yml -f ./docker-compose.test.yml \
+              --env-file .env \
               ps -a --format '{{.ExitCode}}' \
             | grep -v '^0$' \
             || true
@@ -76,6 +84,7 @@ jobs:
             echo 'Non-zero exit codes found.'
             docker compose \
               -f ./docker-compose.yml -f ./docker-compose.test.yml \
+              --env-file .env \
               ps -a
             exit 1
           fi

@@ -46,10 +46,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build for testing
+      - name: Build docker images for testing
         run: docker compose -f ./docker-compose.yml -f ./docker-compose.test.yml build
 
-      - name: Run docker containers for testing
+      - name: Run docker images for testing
         run: |
           docker compose \
             -f ./docker-compose.yml -f ./docker-compose.test.yml \
@@ -58,12 +58,18 @@ jobs:
 
           # Check services for non-zero exit codes
           NON_ZERO_EXIT_CODES=$(
-            docker compose L
+            docker compose \
               -f ./docker-compose.yml -f ./docker-compose.test.yml \
-              ps -a --format '{{json .ExitCode}}' \
-            | tr -d '[:space:]0'
+              ps -a --format '{{.ExitCode}}' \
+            | grep -v '^0$' \
+            || true
           )
           if [ -n "${NON_ZERO_EXIT_CODES}" ]; then
             # Non-zero exit code found
+            echo ''
+            echo 'Non-zero exit codes found.'
+            docker compose \
+              -f ./docker-compose.yml -f ./docker-compose.test.yml \
+              ps -a
             exit 1
           fi

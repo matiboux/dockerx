@@ -276,8 +276,8 @@ if [ $# -gt 0 ]; then
 			break
 		fi
 
-		if [ "$(echo "$ARG" | grep ' ')" ]; then
-			# Escape argument with spaces
+		if [ "$(echo "$ARG" | grep "[ '\"\$\`;*&#<>|]")" ]; then
+			# Escape argument with spaces or special shell characters
 			ARG="'$ARG'"
 		fi
 
@@ -361,8 +361,8 @@ if [ $# -gt 0 ]; then
 			continue
 		fi
 
-		if [ "$(echo "$ARG" | grep ' ')" ]; then
-			# Escape argument with spaces
+		if [ "$(echo "$ARG" | grep "[ '\"\$\`;*&#<>|]")" ]; then
+			# Escape argument with spaces or special shell characters
 			ARG="'$ARG'"
 		fi
 

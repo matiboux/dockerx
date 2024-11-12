@@ -44,7 +44,7 @@ def test_echo_double_quote(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'"\'',
 			),
 		)
@@ -56,7 +56,7 @@ def test_echo_dollar(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'$\'',
 			),
 		)
@@ -68,7 +68,7 @@ def test_echo_backtick(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'`\'',
 			),
 		)
@@ -80,7 +80,7 @@ def test_echo_semicolon(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \';\'',
 			),
 		)
@@ -92,7 +92,7 @@ def test_echo_star(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'*\'',
 			),
 		)
@@ -104,7 +104,7 @@ def test_echo_ampersand(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'&\'',
 			),
 		)
@@ -116,7 +116,7 @@ def test_echo_hash(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'#\'',
 			),
 		)
@@ -128,7 +128,7 @@ def test_echo_lt(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'<\'',
 			),
 		)
@@ -140,7 +140,7 @@ def test_echo_gt(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'>\'',
 			),
 		)
@@ -152,7 +152,7 @@ def test_echo_pipe(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(
-			format_dockerx_stdout( # FIXME
+			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'|\'',
 			),
 		)

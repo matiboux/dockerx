@@ -1,0 +1,349 @@
+#!/bin/sh
+
+# DockerX (v0.1.0)
+# Wrapper for running docker programs & docker shell environments.
+# https://github.com/matiboux/dockerx
+# MIT License
+# Copyright (c) 2024 Matiboux
+
+VERSION="0.1.0"
+
+# Default options
+PRINT_HELP=false
+PRINT_VERSION=false
+UPDATE=false
+CONTEXT_GET=false
+CONTEXT_SET=false
+CONTEXT_NEW_PATH=''
+DRY_RUN=false
+QUIET=false
+
+# Parse options
+while true; do
+	case "$1" in
+		'--help' | '-h' )
+			# Print help
+			PRINT_HELP=true
+			shift
+			;;
+		'--version' | '-v' )
+			# Print version
+			PRINT_VERSION=true
+			shift
+			;;
+		'--update' )
+			# Update DockerX
+			UPDATE=true
+			shift
+			;;
+		'--get-context' | '-g' | '-c' )
+			# Get context path
+			CONTEXT_GET=true
+			shift
+			;;
+		'--set-context' | '-s' | '-C' )
+			# Set context path
+			CONTEXT_SET=true
+			shift
+			if [ $# -gt 0 ] && [ "$(echo "$1" | cut -c1)" != '-' ]; then
+				CONTEXT_NEW_PATH="$1"
+				shift
+			fi
+			;;
+		'--reset-context' | '-r' )
+			# Unset context path
+			CONTEXT_SET=true
+			CONTEXT_NEW_PATH='null'
+			shift
+			;;
+		'--dry-run' | '-n' )
+			# Dry run, print docker command without running it
+			DRY_RUN=true
+			shift
+			;;
+		'--quiet' | '-q' )
+			# Quiet, do not print docker command
+			QUIET=true
+			shift
+			;;
+		* )
+			break
+			;;
+	esac
+done
+
+if [ "$PRINT_HELP" = true ]; then
+	# Print help and exit
+	echo 'Usage:'
+	echo "  $0 [options] <image> [ [...docker_options] -- ] [...command]"
+	echo "  $0 [options] <image> [ [...docker_options] -- ] [@preset] [...args]"
+	echo "  $0 --set-context [path]"
+	echo ''
+	echo 'DockerX will run the specified docker image in the context of your'
+	echo 'working directory. '
+	echo ''
+	echo 'Arguments:'
+	echo '  options: DockerX options'
+	echo '  image: Docker image to run'
+	echo '  docker_options: Options passed to docker run command'
+	echo '  command: Command to run in the container'
+	echo '  @preset: DockerX preset (shortcut for a command)'
+	echo '  args: Arguments appended to the preset command'
+	echo ''
+	echo 'Arguments details:'
+	echo '  options:'
+	echo '    -h, --help           Print this help and exit'
+	echo '    -v, --version        Print version and exit'
+	echo '    --update             Update DockerX and exit'
+	echo '    -g, --get-context    Get the DockerX context path'
+	echo '    -c, --set-context    Set the DockerX context path'
+	echo '    -r, --reset-context  Unset the DockerX context path'
+	echo '    -n, --dry-run        Dry run, print docker command without running it'
+	echo '    -q, --quiet          Quiet, do not print docker command'
+	echo '  @preset: One of the following:'
+	echo '    $, @sh  Run a `sh` shell in the container'
+	exit 0
+fi
+
+# Function to get latest version
+get_latest_version() {
+	# Syntax: '"tag_name": "v1.0.0",'
+	LATEST_VERSION_JSON=$(
+		curl -fsSL "https://api.github.com/repos/matiboux/dockerx/releases/latest" 2>/dev/null \
+		| grep -Eo '"tag_name": "(.+?)",'
+	)
+
+	if [ -n "$LATEST_VERSION_JSON" ]; then
+		if [ "$(uname -s)" = 'Darwin' ]; then
+			# MacOS
+			LATEST_VERSION="${LATEST_VERSION_JSON:14:$((${#LATEST_VERSION_JSON}-14-2))}"
+		else
+			# Linux
+			LATEST_VERSION=$(expr substr "$LATEST_VERSION_JSON" $(expr 1 + 14) $(expr length "$LATEST_VERSION_JSON" - 14 - 2))
+		fi
+
+		echo "$LATEST_VERSION"
+	fi
+}
+
+if [ "$PRINT_VERSION" = true ]; then
+
+	# Print version and exit
+	if [ "$QUIET" = false ]; then
+		echo "DockerX (v$VERSION) - https://github.com/matiboux/dockerx"
+
+		if [ "$DRY_RUN" = false ]; then
+			LATEST_VERSION=$(get_latest_version)
+			if [ -z "$LATEST_VERSION" ]; then
+				echo 'Warning: Could not determine latest version.'
+			elif [ "$VERSION" != "$LATEST_VERSION" ]; then
+				echo "Notice: DockerX is not up to date, latest version is $LATEST_VERSION!"
+			fi
+		fi
+
+	else
+		echo "v$VERSION"
+	fi
+
+	exit 0
+fi
+
+if [ "$UPDATE" = true ]; then
+	# Update DockerX and exit
+	echo 'Error: Update not implemented yet.'
+	exit 1
+fi
+
+# Get dockerx context path file
+if [ -n "$DOCKERX_CONTEXT_FILE" ]; then
+	CONTEXT_FILE="$DOCKERX_CONTEXT_FILE"
+elif [ -n "$CONTEXT_FILE" ]; then
+	CONTEXT_FILE="$CONTEXT_FILE"
+elif [ -n "$HOME" ]; then
+	CONTEXT_FILE="$HOME/.dockerx"
+else
+	CONTEXT_FILE='~/.dockerx'
+fi
+
+# Get saved context path
+if [ -n "$DOCKERX_CONTEXT_PATH" ]; then
+	CONTEXT_PATH_SOURCE='ENV'
+	CONTEXT_PATH="$DOCKERX_CONTEXT_PATH"
+elif [ -n "$CONTEXT_PATH" ]; then
+	CONTEXT_PATH_SOURCE='ENV'
+	CONTEXT_PATH="$CONTEXT_PATH"
+elif [ -f "$CONTEXT_FILE" ]; then
+	CONTEXT_PATH_SOURCE='FILE'
+	CONTEXT_PATH="$(cat "$CONTEXT_FILE")"
+fi
+
+if [ ! -d "$CONTEXT_PATH" ]; then
+	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
+		echo "Error: Context path '$CONTEXT_PATH' not found"
+		exit 1
+	fi
+
+	if [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
+		echo "Warning: Context path '$CONTEXT_PATH' not found, using current directory"
+	fi
+
+	CONTEXT_PATH_SOURCE='DEFAULT'
+	CONTEXT_PATH="$(pwd)"
+fi
+
+if [ "$CONTEXT_GET" = true ]; then
+	# Get context path and exit
+
+	if [ -z "$CONTEXT_PATH" ]; then
+		echo 'Error: Context path not set'
+		exit 1
+	fi
+
+	echo "$CONTEXT_PATH"
+
+	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
+		echo '(from environment variable)'
+	elif [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
+		echo '(from .dockerx file)'
+	fi
+
+	exit 0
+fi
+
+if [ "$CONTEXT_SET" = true ]; then
+	# Set context path and exit
+
+	if [ "$CONTEXT_NEW_PATH" = 'null' ]; then
+		# Unset context path
+		rm "$CONTEXT_FILE" 2>/dev/null
+		echo 'Context path unset'
+		exit 0
+	fi
+
+	if [ -z "$CONTEXT_NEW_PATH" ]; then
+		# Use current directory as context
+		CONTEXT_NEW_PATH="$(pwd)"
+	fi
+
+	if [ ! -d "$CONTEXT_NEW_PATH" ]; then
+		if [ -f "$CONTEXT_NEW_PATH" ]; then
+			# Use parent directory as context
+			echo "Warning: Using parent directory of '$CONTEXT_NEW_PATH' as context"
+			CONTEXT_NEW_PATH=$(dirname "$CONTEXT_NEW_PATH")
+		else
+			echo "Error: Directory '$CONTEXT_NEW_PATH' not found"
+			exit 1
+		fi
+	fi
+
+	# Use absolute path
+	CONTEXT_NEW_PATH=$(cd "$CONTEXT_NEW_PATH" && pwd)
+
+	# Save context path
+	echo "$CONTEXT_NEW_PATH" > ~/.dockerx
+
+	# Print context path
+	echo "Context path set to: '$CONTEXT_NEW_PATH'"
+	echo "(saved in ~/.dockerx)"
+
+	exit 0
+fi
+
+# Get image
+if [ $# -eq 0 ]; then
+	echo 'Error: No image specified'
+	exit 1
+fi
+
+DOCKER_IMAGE="$1"
+shift
+
+# Get docker options
+DOCKER_OPTIONS=''
+DOCKER_OPTIONS_COUNT=''
+FOUND_DOCKER_OPTIONS=false
+if [ $# -gt 0 ]; then
+	for ARG in "$@"; do
+		if [ "$ARG" = '--' ]; then
+			FOUND_DOCKER_OPTIONS=true
+			break
+		fi
+
+		DOCKER_OPTIONS="$DOCKER_OPTIONS '$ARG'"
+		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT + 1))
+	done
+fi
+
+if [ "$FOUND_DOCKER_OPTIONS" = true ]; then
+	while [ $DOCKER_OPTIONS_COUNT -gt 0 ]; do
+		# Remove docker options
+		shift
+		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT - 1))
+	done
+	# Remove '--'
+	shift
+fi
+
+# Get command
+COMMAND=''
+ARGS=''
+if [ $# -gt 0 ]; then
+	# Check for arguments preset
+	PRINT_COMMAND_PRESET_HELP='false'
+	COMMAND_PRESET=''
+	if [ "$1" = '@' ]; then
+		PRINT_COMMAND_PRESET_HELP='true'
+		shift
+	elif [ "$1" = '$' ]; then
+		COMMAND_PRESET="@sh"
+		shift
+	elif [ "$(echo "$1" | cut -c1)" = '@' ]; then
+		if [ "$(echo "$1" | cut -c2)" = '@' ]; then
+			# Escape command preset
+			COMMAND="${1#?}"
+			shift
+		else
+			COMMAND_PRESET="$1"
+			shift
+		fi
+	fi
+
+	if [ -n "$COMMAND_PRESET" ]; then
+		# Parse command preset
+		case "${COMMAND_PRESET#?}" in
+
+			'sh' )
+				COMMAND='sh'
+				;;
+
+			*)
+				echo "Error: Unknown command preset '$COMMAND_PRESET'"
+				exit 1
+				;;
+
+		esac
+	fi
+fi
+
+if [ -n "$COMMAND" ]; then
+	# Add leading space
+	COMMAND=" $COMMAND"
+fi
+
+# Get arguments
+ARGS=''
+if [ $# -gt 0 ]; then
+	ARGS=" $@"
+fi
+
+if [ "$QUIET" = false ]; then
+	# Print docker command
+	echo ''
+	echo "> docker run -v "$CONTEXT_PATH:/app"$DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
+	echo ''
+fi
+
+if [ "$DRY_RUN" = false ]; then
+	# Run docker command
+	exec docker run -v "$CONTEXT_PATH:/app"$DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS
+fi

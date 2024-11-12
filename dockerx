@@ -259,7 +259,7 @@ DOCKER_IMAGE="$1"
 shift
 
 # Get docker options
-DOCKER_OPTIONS="-it -v '$CONTEXT_PATH:/app'"
+DOCKER_OPTIONS=''
 DOCKER_OPTIONS_COUNT=0
 FOUND_DOCKER_OPTIONS=false
 if [ $# -gt 0 ]; then
@@ -287,14 +287,23 @@ if [ $# -gt 0 ]; then
 fi
 
 if [ "$FOUND_DOCKER_OPTIONS" = true ]; then
+	# Docker options found
 	while [ $DOCKER_OPTIONS_COUNT -gt 0 ]; do
-		# Remove docker options
+		# Remove docker options from arguments
 		shift
 		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT - 1))
 	done
-	# Remove '--'
+	# Remove '--' separator from arguments
 	shift
+else
+	# Docker options not found
+	# Arguments are commands, not options
+	DOCKER_OPTIONS=''
+	DOCKER_OPTIONS_COUNT=0
 fi
+
+# Prepend DockerX docker options
+DOCKER_OPTIONS="-it -v '$CONTEXT_PATH:/app'$DOCKER_OPTIONS"
 
 # Get command
 COMMAND=''

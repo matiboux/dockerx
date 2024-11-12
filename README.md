@@ -24,6 +24,42 @@ sudo /bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/matiboux/dockerx
 ```
 
 
+## Usage
+
+DockerX simplifies running docker programs and docker shell environments in your project or working directory.
+
+Examples:
+
+- Run the Python interactive interpreter in your current working directory:
+
+  ```sh
+  dockerx python
+  # -> docker run -it --rm -v $(pwd):/workdir -w /workdir python
+  ```
+
+- Run a shell command in an Ubuntu environment in your current working directory:
+
+  ```sh
+  dockerx ubuntu find . -type f -name "*.txt"
+  # -> docker run -it --rm -v $(pwd):/workdir -w /workdir ubuntu find . -type f -name '*.txt'
+  ```
+
+- Set your project directory as context and run commands in it:
+
+  ```sh
+  # Set your project directory as context path (eg. /home/user/my-project)
+  dockerx -s
+  # -> Saves /home/user/my-project as context path in ~/.dockerx
+
+  # Change directory in your project (eg. /home/user/my-project/src)
+  cd src/
+  
+  # Run npm install in your project
+  dockerx node npm install
+  # -> docker run -it --rm -v /home/user/my-project:/workdir -w /workdir node npm install
+  ```
+
+
 ## License
 
 Copyright (c) 2024 [Matiboux](https://github.com/matiboux) ([matiboux.me](https://matiboux.me))

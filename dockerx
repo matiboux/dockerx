@@ -260,16 +260,28 @@ shift
 
 # Get docker options
 DOCKER_OPTIONS=''
-DOCKER_OPTIONS_COUNT=''
+DOCKER_OPTIONS_COUNT=0
 FOUND_DOCKER_OPTIONS=false
 if [ $# -gt 0 ]; then
 	for ARG in "$@"; do
+
+		if [ -z "$ARG" ]; then
+			# Skip empty arguments
+			continue
+		fi
+
 		if [ "$ARG" = '--' ]; then
+			# Found docker options separator
 			FOUND_DOCKER_OPTIONS=true
 			break
 		fi
 
-		DOCKER_OPTIONS="$DOCKER_OPTIONS '$ARG'"
+		if [ "$(echo "$ARG" | grep ' ')" ]; then
+			# Escape argument with spaces
+			ARG="'$ARG'"
+		fi
+
+		DOCKER_OPTIONS="$DOCKER_OPTIONS $ARG"
 		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT + 1))
 	done
 fi

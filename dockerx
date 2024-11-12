@@ -244,7 +244,18 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 
-IMAGE="$1"
+DOCKER_IMAGE="$1"
 shift
+ARGS="$@"
 
-echo "TODO: Run docker image '$IMAGE' in context '$CONTEXT_PATH' with options: $@"
+if [ "$QUIET" = false ]; then
+	# Print docker command
+	echo ''
+	echo "> docker run -v "$CONTEXT_PATH:/app" $DOCKER_IMAGE $ARGS"
+	echo ''
+fi
+
+if [ "$DRY_RUN" = false ]; then
+	# Run docker command
+	exec docker run -v "$CONTEXT_PATH:/app" $DOCKER_IMAGE $ARGS
+fi

@@ -1,0 +1,69 @@
+name: Check CI
+
+on:
+
+  # Run on pull requests to primary branches
+  pull_request:
+    branches:
+      - master
+      - main
+      - prod
+      - production
+      - staging
+      - dev
+      - develop
+      - development
+      - test
+    paths:
+      - '.github/workflows/check.yml'
+      - 'dockerx'
+      - 'test/**'
+      - 'docker-compose.yml'
+      - 'docker-compose.test.yml'
+
+  # Run on manual triggers
+  workflow_dispatch:
+
+# Set GITHUB_TOKEN permissions for the workflow
+permissions:
+  contents: read
+
+# Set workflow concurrency rules
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # Test job
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build for testing
+        run: docker compose -f ./docker-compose.yml -f ./docker-compose.test.yml build
+
+      - name: Run docker containers for testing
+        run: |
+          docker compose \
+            -f ./docker-compose.yml -f ./docker-compose.test.yml \
+            --env-file .env --env-file .env.test \
+            up
+
+          # Check services for non-zero exit codes
+          NON_ZERO_EXIT_CODES=$(
+            docker compose L
+              -f ./docker-compose.yml -f ./docker-compose.test.yml \
+              ps -a --format '{{json .ExitCode}}' \
+            | tr -d '[:space:]0'
+          )
+          if [ -n "${NON_ZERO_EXIT_CODES}" ]; then
+            # Non-zero exit code found
+            exit 1
+          fi

@@ -51,10 +51,16 @@ jobs:
 
       - name: Run docker images for testing
         run: |
+          echo "::group::Run tests"
+
           docker compose \
             -f ./docker-compose.yml -f ./docker-compose.test.yml \
             --env-file .env --env-file .env.test \
             up
+
+          echo "::endgroup::"
+
+          echo '::group::Check tests success'
 
           # Check services for non-zero exit codes
           NON_ZERO_EXIT_CODES=$(
@@ -73,3 +79,5 @@ jobs:
               ps -a
             exit 1
           fi
+
+          echo '::endgroup::'

@@ -2,7 +2,6 @@ from test.src.TestDirContext import TestDirContext
 from test.src.format_dockerx_stdout import format_dockerx_stdout
 
 def test_short_option(file = __file__):
-	# Invalid usage
 	with TestDirContext(file) as ctx:
 		dockerx = ctx.run_dockerx(
 			'-n', 'ubuntu', '-q', '--',
@@ -14,7 +13,6 @@ def test_short_option(file = __file__):
 		)
 
 def test_long_option(file = __file__):
-	# Invalid usage
 	with TestDirContext(file) as ctx:
 		dockerx = ctx.run_dockerx(
 			'-n', 'ubuntu', '-e', 'VAR=VALUE', '--',

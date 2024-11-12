@@ -283,6 +283,7 @@ if [ $# -gt 0 ]; then
 
 		DOCKER_OPTIONS="$DOCKER_OPTIONS $ARG"
 		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT + 1))
+
 	done
 fi
 
@@ -307,7 +308,6 @@ DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir$DOCKER_OPTIONS"
 
 # Get command
 COMMAND=''
-ARGS=''
 if [ $# -gt 0 ]; then
 	# Check for arguments preset
 	PRINT_COMMAND_PRESET_HELP='false'
@@ -354,7 +354,21 @@ fi
 # Get arguments
 ARGS=''
 if [ $# -gt 0 ]; then
-	ARGS=" $@"
+	for ARG in "$@"; do
+
+		if [ -z "$ARG" ]; then
+			# Skip empty arguments
+			continue
+		fi
+
+		if [ "$(echo "$ARG" | grep ' ')" ]; then
+			# Escape argument with spaces
+			ARG="'$ARG'"
+		fi
+
+		ARGS="$ARGS $ARG"
+
+	done
 fi
 
 if [ "$QUIET" = false ]; then

@@ -264,8 +264,6 @@ if [ $# -gt 0 ]; then
 fi
 
 if [ "$FOUND_DOCKER_OPTIONS" = true ]; then
-	# Remove leading space
-	DOCKER_OPTIONS="${DOCKER_OPTIONS:1}"
 	while [ $DOCKER_OPTIONS_COUNT -gt 0 ]; do
 		# Remove docker options
 		shift
@@ -276,16 +274,57 @@ if [ "$FOUND_DOCKER_OPTIONS" = true ]; then
 fi
 
 # Get command
-ARGS="$@"
+COMMAND=''
+ARGS=''
+if [ $# -gt 0 ]; then
+	# Check for arguments preset
+	PRINT_COMMAND_PRESET_HELP='false'
+	COMMAND_PRESET=''
+	if [ "$1" = '@' ]; then
+		PRINT_COMMAND_PRESET_HELP='true'
+		shift
+	elif [ "$1" = '$' ]; then
+		COMMAND_PRESET="@sh"
+		shift
+	elif [ "$(echo "$1" | cut -c1)" = '@' ]; then
+		COMMAND_PRESET="$1"
+		shift
+	fi
+
+	if [ -n "$COMMAND_PRESET" ]; then
+		# Parse command preset
+		case "${COMMAND_PRESET#?}" in
+
+			'sh' )
+				COMMAND='sh'
+				;;
+
+			*)
+				echo "Error: Unknown command preset '$COMMAND_PRESET'"
+				exit 1
+				;;
+
+		esac
+	fi
+fi
+
+# Add leading space
+COMMAND=" $COMMAND"
+
+# Get arguments
+ARGS=''
+if [ $# -gt 0 ]; then
+	ARGS=" $@"
+fi
 
 if [ "$QUIET" = false ]; then
 	# Print docker command
 	echo ''
-	echo "> docker run -v "$CONTEXT_PATH:/app" $DOCKER_OPTIONS $DOCKER_IMAGE $ARGS"
+	echo "> docker run -v "$CONTEXT_PATH:/app"$DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
 	echo ''
 fi
 
 if [ "$DRY_RUN" = false ]; then
 	# Run docker command
-	exec docker run -v "$CONTEXT_PATH:/app" $DOCKER_OPTIONS $DOCKER_IMAGE $ARGS
+	exec docker run -v "$CONTEXT_PATH:/app"$DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS
 fi

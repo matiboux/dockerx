@@ -1,0 +1,22 @@
+# Services overrides for testing in development
+
+services:
+
+  app:
+    # Build override
+    image: ${IMAGES_PREFIX:-app}-test-watch:${DOCKER_TAG:-latest}
+    build:
+      target: app_test_watch
+    # Deploy override
+    develop:
+      watch:
+        # Docker image
+        - action: rebuild
+          path: ./docker/Dockerfile
+        # Application source code
+        - action: sync
+          path: .
+          target: /app
+        - action: sync
+          path: ./test
+          target: /app/test

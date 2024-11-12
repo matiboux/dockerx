@@ -260,29 +260,50 @@ shift
 
 # Get docker options
 DOCKER_OPTIONS=''
-DOCKER_OPTIONS_COUNT=''
+DOCKER_OPTIONS_COUNT=0
 FOUND_DOCKER_OPTIONS=false
 if [ $# -gt 0 ]; then
 	for ARG in "$@"; do
+
+		if [ -z "$ARG" ]; then
+			# Skip empty arguments
+			continue
+		fi
+
 		if [ "$ARG" = '--' ]; then
+			# Found docker options separator
 			FOUND_DOCKER_OPTIONS=true
 			break
 		fi
 
-		DOCKER_OPTIONS="$DOCKER_OPTIONS '$ARG'"
+		if [ "$(echo "$ARG" | grep ' ')" ]; then
+			# Escape argument with spaces
+			ARG="'$ARG'"
+		fi
+
+		DOCKER_OPTIONS="$DOCKER_OPTIONS $ARG"
 		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT + 1))
 	done
 fi
 
 if [ "$FOUND_DOCKER_OPTIONS" = true ]; then
+	# Docker options found
 	while [ $DOCKER_OPTIONS_COUNT -gt 0 ]; do
-		# Remove docker options
+		# Remove docker options from arguments
 		shift
 		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT - 1))
 	done
-	# Remove '--'
+	# Remove '--' separator from arguments
 	shift
+else
+	# Docker options not found
+	# Arguments are commands, not options
+	DOCKER_OPTIONS=''
+	DOCKER_OPTIONS_COUNT=0
 fi
+
+# Prepend DockerX docker options
+DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir$DOCKER_OPTIONS"
 
 # Get command
 COMMAND=''
@@ -339,11 +360,11 @@ fi
 if [ "$QUIET" = false ]; then
 	# Print docker command
 	echo ''
-	echo "> docker run -v "$CONTEXT_PATH:/app"$DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
+	echo "> docker run $DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
 	echo ''
 fi
 
 if [ "$DRY_RUN" = false ]; then
 	# Run docker command
-	exec docker run -v "$CONTEXT_PATH:/app"$DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS
+	exec sh -c "docker run $DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
 fi

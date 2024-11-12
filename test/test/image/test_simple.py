@@ -8,6 +8,6 @@ def test_simple(file = __file__):
 		)
 		dockerx.assert_context_ok(
 			format_dockerx_stdout(
-				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/app\' ubuntu'
+				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu',
 			),
 		)

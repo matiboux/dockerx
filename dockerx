@@ -303,7 +303,7 @@ else
 fi
 
 # Prepend DockerX docker options
-DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/app'$DOCKER_OPTIONS"
+DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir$DOCKER_OPTIONS"
 
 # Get command
 COMMAND=''

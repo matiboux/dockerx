@@ -6,7 +6,6 @@ def test_echo_words(file = __file__):
 		dockerx = ctx.run_dockerx(
 			'-n', 'ubuntu', 'echo', 'hello', 'world',
 		)
-		# Default is to run the image's default command
 		dockerx.assert_context_ok(
 			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo hello world',
@@ -18,7 +17,6 @@ def test_echo_phrase(file = __file__):
 		dockerx = ctx.run_dockerx(
 			'-n', 'ubuntu', 'echo', 'The quick brown fox jumps over the lazy dog.',
 		)
-		# Default is to run the image's default command
 		dockerx.assert_context_ok(
 			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'The quick brown fox jumps over the lazy dog.\'',
@@ -30,7 +28,6 @@ def test_echo_mix(file = __file__):
 		dockerx = ctx.run_dockerx(
 			'-n', 'ubuntu', 'echo', 'To be', 'or', 'not to be?',
 		)
-		# Default is to run the image's default command
 		dockerx.assert_context_ok(
 			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu echo \'To be\' or \'not to be?\'',

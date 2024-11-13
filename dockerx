@@ -277,7 +277,7 @@ if [ "$CONTEXT_SET" = true ]; then
 fi
 
 # Get image
-if [ $# -eq 0 ]; then
+if [ $# -eq 0 ] || [ -z "$1" ]; then
 	echo 'Error: No image specified' >&2
 	exit 1
 fi

@@ -13,6 +13,9 @@ services:
         # Docker image
         - action: rebuild
           path: ./docker/Dockerfile
+        # Application build files
+        - action: rebuild
+          path: ./docker/test-watch-command.sh
         # Application source code
         - action: sync
           path: .

@@ -5,6 +5,7 @@
 # https://github.com/matiboux/dockerx
 # MIT License
 # Copyright (c) 2024 Matiboux
+# This project is not affiliated with Docker, Inc.
 
 VERSION="0.1.0"
 

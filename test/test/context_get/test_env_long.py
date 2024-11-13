@@ -6,6 +6,7 @@ def test_get_context(file = __file__):
 			'--get-context',
 			env = {
 				'DOCKERX_CONTEXT_PATH': '/tmp',
+				'DOCKERX_CHECK_PARENT_CONTEXT': 'false',
 			},
 		)
 		dockerx.assert_context_ok(
@@ -19,6 +20,7 @@ def test_get_context_shorthand_g(file = __file__):
 			'-g',
 			env = {
 				'DOCKERX_CONTEXT_PATH': '/tmp',
+				'DOCKERX_CHECK_PARENT_CONTEXT': 'false',
 			},
 		)
 		dockerx.assert_context_ok(
@@ -32,6 +34,7 @@ def test_get_context_shorthand_c(file = __file__):
 			'-c',
 			env = {
 				'DOCKERX_CONTEXT_PATH': '/tmp',
+				'DOCKERX_CHECK_PARENT_CONTEXT': 'false',
 			},
 		)
 		dockerx.assert_context_ok(

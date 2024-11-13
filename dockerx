@@ -165,6 +165,12 @@ else
 	CONTEXT_FILE='~/.dockerx'
 fi
 
+# Get dockerx check parent context flag
+CHECK_PARENT_CONTEXT='true'
+if [ -n "$DOCKERX_CHECK_PARENT_CONTEXT" ]; then
+	CHECK_PARENT_CONTEXT="$DOCKERX_CHECK_PARENT_CONTEXT"
+fi
+
 # Get saved context path
 if [ -n "$DOCKERX_CONTEXT_PATH" ]; then
 	CONTEXT_PATH_SOURCE='ENV'
@@ -180,7 +186,10 @@ else
 	CONTEXT_PATH=''
 fi
 
-if [ -d "$CONTEXT_PATH" ] && echo "$(pwd)" | grep -qv "^$(echo "$CONTEXT_PATH" | sed 's/[\/]\?$//')"; then
+if [ "$CHECK_PARENT_CONTEXT" = 'true' ] &&
+	[ -d "$CONTEXT_PATH" ] &&
+	echo "$(pwd)" | grep -qv "^$(echo "$CONTEXT_PATH" | sed 's/[\/]\?$//')"
+then
 	# Context path is not a parent directory of the current directory
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
 		echo "Error: Context path '$CONTEXT_PATH' is not a parent directory"

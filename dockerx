@@ -319,6 +319,7 @@ if [ "$DOCKER_IMAGE" = 'dockerc' ]; then
 
 	if [ "$DRY_RUN" = false ]; then
 		# Run dockerc command
+		export DOCKERC_FIRST_NEWLINE='false'
 		exec sh -c "cd \"$CONTEXT_PATH\" && dockerc$ARGS"
 	fi
 

@@ -82,9 +82,12 @@ class RunDockerx():
     def assert_context_ok(
         self,
         stdout: bytes | re.Pattern = b'',
+        *,
+        stderr: bytes | re.Pattern | None = None,
     ):
         return self.assert_context(
             stdout = stdout,
+            **({'stderr': stderr} if stderr is not None else {}),
         )
 
     def assert_context_error(

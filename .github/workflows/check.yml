@@ -84,14 +84,16 @@ jobs:
             || true
           )
           if [ -n "${NON_ZERO_EXIT_CODES}" ]; then
-            # Non-zero exit code found
-            echo ''
+            # Non-zero exit codes found
             echo 'Non-zero exit codes found.'
             docker compose \
               -f ./docker-compose.yml -f ./docker-compose.test.yml \
               --env-file .env \
               ps -a
             exit 1
+          else
+            # All services succeeded
+            echo 'All services succeeded.'
           fi
 
           echo '::endgroup::'

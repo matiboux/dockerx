@@ -192,7 +192,7 @@ if [ "$CHECK_PARENT_CONTEXT" = 'true' ] &&
 then
 	# Context path is not a parent directory of the current directory
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
-		echo "Error: Context path '$CONTEXT_PATH' is not a parent directory"
+		echo "Error: Context path '$CONTEXT_PATH' is not a parent directory" >&2
 		exit 1
 	fi
 
@@ -203,12 +203,12 @@ fi
 
 if [ -z "$CONTEXT_PATH" ] || [ ! -d "$CONTEXT_PATH" ]; then
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
-		echo "Error: Context path '$CONTEXT_PATH' not found"
+		echo "Error: Context path '$CONTEXT_PATH' not found" >&2
 		exit 1
 	fi
 
 	if [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
-		echo "Warning: Context path '$CONTEXT_PATH' not found, using current directory"
+		echo "Warning: Context path '$CONTEXT_PATH' not found, using current directory" >&2
 	fi
 
 	CONTEXT_PATH_SOURCE='DEFAULT'
@@ -254,10 +254,10 @@ if [ "$CONTEXT_SET" = true ]; then
 	if [ ! -d "$CONTEXT_NEW_PATH" ]; then
 		if [ -f "$CONTEXT_NEW_PATH" ]; then
 			# Use parent directory as context
-			echo "Warning: Using parent directory of '$CONTEXT_NEW_PATH' as context"
+			echo "Warning: Using parent directory of '$CONTEXT_NEW_PATH' as context" >&2
 			CONTEXT_NEW_PATH=$(dirname "$CONTEXT_NEW_PATH")
 		else
-			echo "Error: Directory '$CONTEXT_NEW_PATH' not found"
+			echo "Error: Directory '$CONTEXT_NEW_PATH' not found" >&2
 			exit 1
 		fi
 	fi
@@ -365,7 +365,7 @@ if [ $# -gt 0 ]; then
 				;;
 
 			*)
-				echo "Error: Unknown command preset '$COMMAND_PRESET'"
+				echo "Error: Unknown command preset '$COMMAND_PRESET'" >&2
 				exit 1
 				;;
 

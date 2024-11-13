@@ -135,9 +135,9 @@ if [ "$PRINT_VERSION" = true ]; then
 		if [ "$DRY_RUN" = false ]; then
 			LATEST_VERSION=$(get_latest_version)
 			if [ -z "$LATEST_VERSION" ]; then
-				echo 'Warning: Could not determine latest version.'
+				echo 'Warning: Could not determine latest version.' >&2
 			elif [ "$VERSION" != "$LATEST_VERSION" ]; then
-				echo "Notice: DockerX is not up to date, latest version is $LATEST_VERSION!"
+				echo "Notice: DockerX is not up to date, latest version is $LATEST_VERSION!" >&2
 			fi
 		fi
 
@@ -150,7 +150,7 @@ fi
 
 if [ "$UPDATE" = true ]; then
 	# Update DockerX and exit
-	echo 'Error: Update not implemented yet.'
+	echo 'Error: Update not implemented yet.' >&2
 	exit 1
 fi
 
@@ -219,7 +219,7 @@ if [ "$CONTEXT_GET" = true ]; then
 	# Get context path and exit
 
 	if [ -z "$CONTEXT_PATH" ]; then
-		echo 'Error: Context path not set'
+		echo 'Error: Context path not set' >&2
 		exit 1
 	fi
 
@@ -277,7 +277,7 @@ fi
 
 # Get image
 if [ $# -eq 0 ]; then
-	echo 'Error: No image specified'
+	echo 'Error: No image specified' >&2
 	exit 1
 fi
 

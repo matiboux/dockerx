@@ -49,10 +49,15 @@ jobs:
       - name: Build docker images for testing
         run: |
           # docker compose build
+
+          echo "::group::Build tests"
+
           docker compose \
             -f ./docker-compose.yml -f ./docker-compose.test.yml \
             --env-file .env \
             build
+
+          echo "::endgroup::"
 
       - name: Run docker images for testing
         run: |

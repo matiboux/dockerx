@@ -65,3 +65,8 @@ Examples:
 Copyright (c) 2024 [Matiboux](https://github.com/matiboux) ([matiboux.me](https://matiboux.me))
 
 Licensed under the [MIT License](https://opensource.org/license/MIT). You can see a copy in the [LICENSE](LICENSE) file.
+
+Disclaimer:  
+Docker is a trademark of Docker, Inc.
+The license of this project does not grant any rights to use the Docker name, logo, or trademarks.
+This project is not affiliated with Docker, Inc. or any of its related projects.

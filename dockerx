@@ -175,6 +175,9 @@ elif [ -n "$CONTEXT_PATH" ]; then
 elif [ -f "$CONTEXT_FILE" ]; then
 	CONTEXT_PATH_SOURCE='FILE'
 	CONTEXT_PATH="$(cat "$CONTEXT_FILE")"
+else
+	CONTEXT_PATH_SOURCE=''
+	CONTEXT_PATH=''
 fi
 
 if [ ! -d "$CONTEXT_PATH" ]; then

@@ -16,7 +16,7 @@ def test_dollar(file = __file__):
 def test_sh(file = __file__):
 	with TestDirContext(file) as ctx:
 		dockerx = ctx.run_dockerx(
-			'-n', 'ubuntu', 'sh',
+			'-n', 'ubuntu', '@sh',
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_ok(

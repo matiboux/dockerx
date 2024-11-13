@@ -308,10 +308,10 @@ fi
 DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir$DOCKER_OPTIONS"
 
 # Get command
+PRINT_COMMAND_PRESET_HELP='false'
 COMMAND=''
 if [ $# -gt 0 ]; then
 	# Check for arguments preset
-	PRINT_COMMAND_PRESET_HELP='false'
 	COMMAND_PRESET=''
 	if [ "$1" = '@' ]; then
 		PRINT_COMMAND_PRESET_HELP='true'
@@ -347,7 +347,21 @@ if [ $# -gt 0 ]; then
 	fi
 fi
 
+if [ "$PRINT_COMMAND_PRESET_HELP" = true ]; then
+	# Print command presets help and exit
+	echo "Use $0 --help for full help"
+	echo 'DockerX command presets:'
+	echo '  $, @sh  Run a `sh` shell in the container'
+	exit 0
+fi
+
 if [ -n "$COMMAND" ]; then
+	if [ "$(echo "$COMMAND" | grep "[ '\"\$\`;*&#<>|]")" ]; then
+		# Escape argument with spaces or special shell characters
+		# Replace single quotes with escaped single quotes
+		COMMAND="'$(echo "$COMMAND" | sed "s/'/'\"'\"'/g")'"
+	fi
+
 	# Add leading space
 	COMMAND=" $COMMAND"
 fi

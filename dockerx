@@ -312,15 +312,14 @@ if [ "$DOCKER_IMAGE" = 'dockerc' ]; then
 	if [ "$QUIET" = false ]; then
 		# Print dockerc command
 		echo ''
+		echo "> cd '$CONTEXT_PATH'"
 		echo "> dockerc$ARGS"
-		if [ "$DRY_RUN" != false ]; then
-			echo ''
-		fi
+		echo ''
 	fi
 
 	if [ "$DRY_RUN" = false ]; then
 		# Run dockerc command
-		exec sh -c "dockerc$ARGS"
+		exec sh -c "cd \"$CONTEXT_PATH\" && dockerc$ARGS"
 	fi
 
 	exit 0

@@ -285,6 +285,47 @@ fi
 DOCKER_IMAGE="$1"
 shift
 
+if [ "$DOCKER_IMAGE" = 'dockerc' ]; then
+	# Run dockerc command with following arguments
+
+	# Get arguments
+	ARGS=''
+	if [ $# -gt 0 ]; then
+		for ARG in "$@"; do
+
+			if [ -z "$ARG" ]; then
+				# Skip empty arguments
+				continue
+			fi
+
+			if [ "$(echo "$ARG" | grep "[ '\"\$\`;*&#<>|]")" ]; then
+				# Escape argument with spaces or special shell characters
+				# Replace single quotes with escaped single quotes
+				ARG="'$(echo "$ARG" | sed "s/'/'\"'\"'/g")'"
+			fi
+
+			ARGS="$ARGS $ARG"
+
+		done
+	fi
+
+	if [ "$QUIET" = false ]; then
+		# Print dockerc command
+		echo ''
+		echo "> cd '$CONTEXT_PATH'"
+		echo "> dockerc$ARGS"
+		echo ''
+	fi
+
+	if [ "$DRY_RUN" = false ]; then
+		# Run dockerc command
+		export DOCKERC_FIRST_NEWLINE='false'
+		exec sh -c "cd \"$CONTEXT_PATH\" && dockerc$ARGS"
+	fi
+
+	exit 0
+fi
+
 # Get docker options
 DOCKER_OPTIONS=''
 DOCKER_OPTIONS_COUNT=0

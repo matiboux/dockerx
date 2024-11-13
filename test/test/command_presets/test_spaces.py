@@ -17,7 +17,7 @@ def test_escaped_space(file = __file__):
 			'-n', 'ubuntu', '@@yes sir',
 		)
 		# Default is to run the image's default command
-		dockerx.assert_context_error(
+		dockerx.assert_context_ok(
 			format_dockerx_stdout(
 				b'docker run -it --rm -v \'' + ctx.cwd.encode() + b':/workdir\' -w /workdir ubuntu \'@yes sir\'',
 			),

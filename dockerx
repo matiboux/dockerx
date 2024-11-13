@@ -226,11 +226,11 @@ if [ "$CONTEXT_GET" = true ]; then
 	echo "$CONTEXT_PATH"
 
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
-		echo '(from environment variable)'
+		echo '(from environment variable)' >&2
 	elif [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
-		echo '(from .dockerx file)'
+		echo '(from .dockerx file)' >&2
 	elif [ "$CONTEXT_PATH_SOURCE" = 'DEFAULT' ]; then
-		echo '(current directory)'
+		echo '(current directory)' >&2
 	fi
 
 	exit 0
@@ -270,7 +270,7 @@ if [ "$CONTEXT_SET" = true ]; then
 
 	# Print context path
 	echo "Context path set to: '$CONTEXT_NEW_PATH'"
-	echo "(saved in ~/.dockerx)"
+	echo '(saved in ~/.dockerx)' >&2
 
 	exit 0
 fi

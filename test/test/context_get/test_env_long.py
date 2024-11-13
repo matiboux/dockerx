@@ -10,8 +10,12 @@ def test_get_context(file = __file__):
 			},
 		)
 		dockerx.assert_context_ok(
-			b'/tmp\n'
-			b'(from environment variable)\n'
+			(
+				b'/tmp\n'
+			),
+			stderr = (
+				b'(from environment variable)\n'
+			),
 		)
 
 def test_get_context_shorthand_g(file = __file__):
@@ -24,8 +28,12 @@ def test_get_context_shorthand_g(file = __file__):
 			},
 		)
 		dockerx.assert_context_ok(
-			b'/tmp\n'
-			b'(from environment variable)\n'
+			(
+				b'/tmp\n'
+			),
+			stderr = (
+				b'(from environment variable)\n'
+			),
 		)
 
 def test_get_context_shorthand_c(file = __file__):
@@ -38,6 +46,10 @@ def test_get_context_shorthand_c(file = __file__):
 			},
 		)
 		dockerx.assert_context_ok(
-			b'/tmp\n'
-			b'(from environment variable)\n'
+			(
+				b'/tmp\n'
+			),
+			stderr = (
+				b'(from environment variable)\n'
+			),
 		)

@@ -6,8 +6,12 @@ def test_get_context(file = __file__):
 			'--get-context',
 		)
 		dockerx.assert_context_ok(
-			ctx.cwd.encode() + b'\n'
-			b'(current directory)\n'
+			(
+				ctx.cwd.encode() + b'\n'
+			),
+			stderr = (
+				b'(current directory)\n'
+			),
 		)
 
 def test_get_context_shorthand_g(file = __file__):
@@ -16,8 +20,12 @@ def test_get_context_shorthand_g(file = __file__):
 			'-g',
 		)
 		dockerx.assert_context_ok(
-			ctx.cwd.encode() + b'\n'
-			b'(current directory)\n'
+			(
+				ctx.cwd.encode() + b'\n'
+			),
+			stderr = (
+				b'(current directory)\n'
+			),
 		)
 
 def test_get_context_shorthand_c(file = __file__):
@@ -26,6 +34,10 @@ def test_get_context_shorthand_c(file = __file__):
 			'-c',
 		)
 		dockerx.assert_context_ok(
-			ctx.cwd.encode() + b'\n'
-			b'(current directory)\n'
+			(
+				ctx.cwd.encode() + b'\n'
+			),
+			stderr = (
+				b'(current directory)\n'
+			),
 		)

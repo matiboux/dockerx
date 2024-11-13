@@ -32,6 +32,7 @@ class RunDockerx():
 
     def assert_context(
         self,
+        *,
         stdout: bytes | re.Pattern | None = b'',
         stderr: bytes | re.Pattern | None = b'',
         returncode: int = 0,
@@ -56,6 +57,21 @@ class RunDockerx():
         elif stdout is not None:
             assert self.proc_stdout == stdout
 
+        if self.proc_stderr != stderr:
+            # Debugging
+            import difflib
+            diff = difflib.unified_diff(
+                self.proc_stderr.decode('utf-8').splitlines(keepends = True),
+                (
+                    stderr.decode('utf-8').splitlines(keepends = True)
+                    if isinstance(stderr, bytes) else
+                    stderr.pattern.splitlines(keepends = True)
+                    if isinstance(stderr, re.Pattern) else
+                    stderr
+                ),
+            )
+            print(''.join(diff))
+
         if isinstance(stderr, re.Pattern):
             assert stderr.match(self.proc_stderr.decode('utf-8'))
         elif stderr is not None:
@@ -66,15 +82,19 @@ class RunDockerx():
     def assert_context_ok(
         self,
         stdout: bytes | re.Pattern = b'',
+        *,
+        stderr: bytes | re.Pattern | None = None,
     ):
         return self.assert_context(
             stdout = stdout,
+            **({'stderr': stderr} if stderr is not None else {}),
         )
 
     def assert_context_error(
         self,
-        stdout: bytes | re.Pattern | None = None,
         stderr: bytes | re.Pattern | None = None,
+        *,
+        stdout: bytes | re.Pattern | None = None,
         returncode: int = 1,
     ):
         return self.assert_context(

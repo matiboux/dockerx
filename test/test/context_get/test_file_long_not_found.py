@@ -10,9 +10,13 @@ def test_get_context(file = __file__):
 			},
 		)
 		dockerx.assert_context_ok(
-			b'Warning: Context path \'/tmp/not_found\' not found, using current directory\n'
-			+ ctx.cwd.encode() + b'\n'
-			b'(current directory)\n'
+			(
+				ctx.cwd.encode() + b'\n'
+			),
+			stderr = (
+				b'Warning: Context path \'/tmp/not_found\' not found, using current directory\n'
+				b'(current directory)\n'
+			),
 		)
 
 def test_get_context_shorthand_g(file = __file__):
@@ -25,9 +29,13 @@ def test_get_context_shorthand_g(file = __file__):
 			},
 		)
 		dockerx.assert_context_ok(
-			b'Warning: Context path \'/tmp/not_found\' not found, using current directory\n'
-			+ ctx.cwd.encode() + b'\n'
-			b'(current directory)\n'
+			(
+				ctx.cwd.encode() + b'\n'
+			),
+			stderr = (
+				b'Warning: Context path \'/tmp/not_found\' not found, using current directory\n'
+				b'(current directory)\n'
+			),
 		)
 
 def test_get_context_shorthand_c(file = __file__):
@@ -40,7 +48,11 @@ def test_get_context_shorthand_c(file = __file__):
 			},
 		)
 		dockerx.assert_context_ok(
-			b'Warning: Context path \'/tmp/not_found\' not found, using current directory\n'
-			+ ctx.cwd.encode() + b'\n'
-			b'(current directory)\n'
+			(
+				ctx.cwd.encode() + b'\n'
+			),
+			stderr = (
+				b'Warning: Context path \'/tmp/not_found\' not found, using current directory\n'
+				b'(current directory)\n'
+			),
 		)

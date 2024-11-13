@@ -135,9 +135,9 @@ if [ "$PRINT_VERSION" = true ]; then
 		if [ "$DRY_RUN" = false ]; then
 			LATEST_VERSION=$(get_latest_version)
 			if [ -z "$LATEST_VERSION" ]; then
-				echo 'Warning: Could not determine latest version.'
+				echo 'Warning: Could not determine latest version.' >&2
 			elif [ "$VERSION" != "$LATEST_VERSION" ]; then
-				echo "Notice: DockerX is not up to date, latest version is $LATEST_VERSION!"
+				echo "Notice: DockerX is not up to date, latest version is $LATEST_VERSION!" >&2
 			fi
 		fi
 
@@ -150,7 +150,7 @@ fi
 
 if [ "$UPDATE" = true ]; then
 	# Update DockerX and exit
-	echo 'Error: Update not implemented yet.'
+	echo 'Error: Update not implemented yet.' >&2
 	exit 1
 fi
 
@@ -192,7 +192,7 @@ if [ "$CHECK_PARENT_CONTEXT" = 'true' ] &&
 then
 	# Context path is not a parent directory of the current directory
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
-		echo "Error: Context path '$CONTEXT_PATH' is not a parent directory"
+		echo "Error: Context path '$CONTEXT_PATH' is not a parent directory" >&2
 		exit 1
 	fi
 
@@ -203,12 +203,12 @@ fi
 
 if [ -z "$CONTEXT_PATH" ] || [ ! -d "$CONTEXT_PATH" ]; then
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
-		echo "Error: Context path '$CONTEXT_PATH' not found"
+		echo "Error: Context path '$CONTEXT_PATH' not found" >&2
 		exit 1
 	fi
 
 	if [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
-		echo "Warning: Context path '$CONTEXT_PATH' not found, using current directory"
+		echo "Warning: Context path '$CONTEXT_PATH' not found, using current directory" >&2
 	fi
 
 	CONTEXT_PATH_SOURCE='DEFAULT'
@@ -219,18 +219,18 @@ if [ "$CONTEXT_GET" = true ]; then
 	# Get context path and exit
 
 	if [ -z "$CONTEXT_PATH" ]; then
-		echo 'Error: Context path not set'
+		echo 'Error: Context path not set' >&2
 		exit 1
 	fi
 
 	echo "$CONTEXT_PATH"
 
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
-		echo '(from environment variable)'
+		echo '(from environment variable)' >&2
 	elif [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
-		echo '(from .dockerx file)'
+		echo '(from .dockerx file)' >&2
 	elif [ "$CONTEXT_PATH_SOURCE" = 'DEFAULT' ]; then
-		echo '(current directory)'
+		echo '(current directory)' >&2
 	fi
 
 	exit 0
@@ -254,10 +254,10 @@ if [ "$CONTEXT_SET" = true ]; then
 	if [ ! -d "$CONTEXT_NEW_PATH" ]; then
 		if [ -f "$CONTEXT_NEW_PATH" ]; then
 			# Use parent directory as context
-			echo "Warning: Using parent directory of '$CONTEXT_NEW_PATH' as context"
+			echo "Warning: Using parent directory of '$CONTEXT_NEW_PATH' as context" >&2
 			CONTEXT_NEW_PATH=$(dirname "$CONTEXT_NEW_PATH")
 		else
-			echo "Error: Directory '$CONTEXT_NEW_PATH' not found"
+			echo "Error: Directory '$CONTEXT_NEW_PATH' not found" >&2
 			exit 1
 		fi
 	fi
@@ -270,14 +270,14 @@ if [ "$CONTEXT_SET" = true ]; then
 
 	# Print context path
 	echo "Context path set to: '$CONTEXT_NEW_PATH'"
-	echo "(saved in ~/.dockerx)"
+	echo '(saved in ~/.dockerx)' >&2
 
 	exit 0
 fi
 
 # Get image
 if [ $# -eq 0 ]; then
-	echo 'Error: No image specified'
+	echo 'Error: No image specified' >&2
 	exit 1
 fi
 
@@ -365,7 +365,7 @@ if [ $# -gt 0 ]; then
 				;;
 
 			*)
-				echo "Error: Unknown command preset '$COMMAND_PRESET'"
+				echo "Error: Unknown command preset '$COMMAND_PRESET'" >&2
 				exit 1
 				;;
 

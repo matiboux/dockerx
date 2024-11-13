@@ -180,7 +180,19 @@ else
 	CONTEXT_PATH=''
 fi
 
-if [ ! -d "$CONTEXT_PATH" ]; then
+if [ -d "$CONTEXT_PATH" ] && echo "$(pwd)" | grep -qv "^$(echo "$CONTEXT_PATH" | sed 's/[\/]\?$//')"; then
+	# Context path is not a parent directory of the current directory
+	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
+		echo "Error: Context path '$CONTEXT_PATH' is not a parent directory"
+		exit 1
+	fi
+
+	# Clear context path
+	CONTEXT_PATH_SOURCE=''
+	CONTEXT_PATH=''
+fi
+
+if [ -z "$CONTEXT_PATH" ] || [ ! -d "$CONTEXT_PATH" ]; then
 	if [ "$CONTEXT_PATH_SOURCE" = 'ENV' ]; then
 		echo "Error: Context path '$CONTEXT_PATH' not found"
 		exit 1

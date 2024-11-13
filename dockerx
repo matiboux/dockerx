@@ -311,7 +311,9 @@ if [ "$DOCKER_IMAGE" = 'dockerc' ]; then
 
 	if [ "$QUIET" = false ]; then
 		# Print dockerc command
-		echo ''
+		if [ "$DOCKERX_FIRST_NEWLINE" != 'false' ]; then
+			echo ''
+		fi
 		echo "> cd '$CONTEXT_PATH'"
 		echo "> dockerc$ARGS"
 		echo ''
@@ -457,7 +459,9 @@ fi
 
 if [ "$QUIET" = false ]; then
 	# Print docker command
-	echo ''
+	if [ "$DOCKERX_FIRST_NEWLINE" != 'false' ]; then
+		echo ''
+	fi
 	echo "> docker run $DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
 	echo ''
 fi

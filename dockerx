@@ -356,6 +356,12 @@ if [ "$PRINT_COMMAND_PRESET_HELP" = true ]; then
 fi
 
 if [ -n "$COMMAND" ]; then
+	if [ "$(echo "$COMMAND" | grep "[ '\"\$\`;*&#<>|]")" ]; then
+		# Escape argument with spaces or special shell characters
+		# Replace single quotes with escaped single quotes
+		COMMAND="'$(echo "$COMMAND" | sed "s/'/'\"'\"'/g")'"
+	fi
+
 	# Add leading space
 	COMMAND=" $COMMAND"
 fi

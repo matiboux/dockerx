@@ -208,6 +208,8 @@ if [ "$CONTEXT_GET" = true ]; then
 		echo '(from environment variable)'
 	elif [ "$CONTEXT_PATH_SOURCE" = 'FILE' ]; then
 		echo '(from .dockerx file)'
+	elif [ "$CONTEXT_PATH_SOURCE" = 'DEFAULT' ]; then
+		echo '(current directory)'
 	fi
 
 	exit 0

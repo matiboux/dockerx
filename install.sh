@@ -72,11 +72,13 @@ if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
 	echo "Usage: $0 [options] [tag]"
 	echo ''
 	echo 'Options:'
-	echo '  --help, -h         Display this help message'
-	echo '  --install-dir, -i  Installation directory (defaults to /usr/local/bin)'
+	echo '  -h, --help         Print this help message'
+	echo '  -i, --install-dir  Set installation directory'
+	echo "    (defaults to directory '/usr/local/bin')"
 	echo ''
 	echo 'Arguments:'
-	echo '  tag  DockerX tag/version to install (defaults to HEAD)'
+	echo '  tag  DockerX tag/version to install'
+	echo '    (defaults to latest version)'
 	exit ${ERROR_CODE:-0}
 fi
 

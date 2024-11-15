@@ -108,6 +108,37 @@ if [ ! -d "$INSTALL_DIR" ]; then
 	exit 1
 fi
 
+get_latest_version() {
+	# Syntax: '"tag_name": "v1.0.0",'
+	LATEST_VERSION_JSON=$(
+		curl -fsSL "https://api.github.com/repos/matiboux/dockerx/releases/latest" 2>/dev/null \
+		| grep -Eo '"tag_name": "(.+?)",'
+	)
+
+	if [ -n "$LATEST_VERSION_JSON" ]; then
+		# Extract version from matched string
+		# Remove `"tag_name": "` (13 characters) and `",` (2 characters)
+		if [ "$(uname -s)" = 'Darwin' ]; then
+			# MacOS
+			LATEST_VERSION="${LATEST_VERSION_JSON:13:$((${#LATEST_VERSION_JSON}-13-2))}"
+		else
+			# Linux
+			LATEST_VERSION=$(expr substr "$LATEST_VERSION_JSON" $(expr 1 + 13) $(expr length "$LATEST_VERSION_JSON" - 13 - 2))
+		fi
+
+		echo "$LATEST_VERSION"
+	fi
+}
+
+if [ "$INSTALL_TAG" = 'latest' ]; then
+	# Default install tag is latest released version
+	INSTALL_TAG="$(get_latest_version)"
+	if [ -z "$INSTALL_TAG" ]; then
+		echo 'Error: Failed to get DockerX latest version.' >&2
+		exit 1
+	fi
+fi
+
 # Check that docker is installed
 docker --help > /dev/null 2>&1
 if [ $? -ne 0 ]; then

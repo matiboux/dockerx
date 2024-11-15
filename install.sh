@@ -8,53 +8,64 @@
 # This project is not affiliated with Docker, Inc.
 
 ERROR_CODE=''
-DOCKERX_PARSE_ARGUMENTS='true'
 
-# Parse options arguments
-while [ "$DOCKERX_PARSE_ARGUMENTS" = 'true' ] && [ "$#" -gt 0 ]; do
+# Parse arguments
+# Dummy while loop to allow breaking
+while true; do
 
-	case "$1" in
+	# Parse options arguments
+	while [ "$#" -gt 0 ]; do
 
-		'--help' | '-h' )
-			DOCKERX_PRINT_HELP='true'
-			shift
-			;;
+		case "$1" in
 
-		'--install-dir' | '-i' )
-			shift
-			# Get installation directory argument
-			if [ -z "$1" ]; then
-				echo 'Error: Missing installation directory.' >&2
+			'--help' | '-h' )
+				# Print help
 				DOCKERX_PRINT_HELP='true'
-				ERROR_CODE=1
-				# Stop parsing arguments
-				DOCKERX_PARSE_ARGUMENTS='false'
+				shift
+				;;
+
+			'--install-dir' | '-i' )
+				shift
+				# Check for installation directory argument
+				if [ -z "$1" ]; then
+					echo 'Error: Missing installation directory.' >&2
+					DOCKERX_PRINT_HELP='true'
+					ERROR_CODE=1
+					break
+				fi
+				# Set installation directory
+				DOCKERX_INSTALL_DIR="$1"
+				shift
+				;;
+
+			* )
 				break
-			fi
-			DOCKERX_INSTALL_DIR="$1"
-			shift
-			;;
+				;;
 
-		* )
-			# Unknown option, maybe first argument
-			# Stop parsing options
-			break
-			;;
+		esac
 
-	esac
+	done
 
-done
-
-if [ "$DOCKERX_PARSE_ARGUMENTS" = 'true' ]; then
-	# Parse positional arguments
-
-	# Parse install tag optional argument
-	if [ "$#" -gt 0 ]; then
-		DOCKERX_INSTALL_TAG="$1"
-		shift
+	if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
+		# Stop parsing arguments
+		break
 	fi
 
-fi
+	# Check for optional positional arguments
+	if [ "$#" -le 0 ]; then
+		# No more arguments
+		break
+	fi
+
+	# Parse first optional positional argument
+	# Parse install tag argument
+	DOCKERX_INSTALL_TAG="$1"
+	shift
+
+	# Stop parsing arguments
+	break
+
+done
 
 if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
 	# Print help & exit
@@ -69,7 +80,7 @@ if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
 	exit ${ERROR_CODE:-0}
 fi
 
-# Get installation directory
+# Get install directory
 INSTALL_DIR='/usr/local/bin' # Default installation directory
 if [ -n "$DOCKERX_INSTALL_DIR" ]; then
 	# Use from argument or environment variable
@@ -77,10 +88,22 @@ if [ -n "$DOCKERX_INSTALL_DIR" ]; then
 fi
 
 # Get install tag
-INSTALL_TAG='HEAD' # Default required tag
+INSTALL_TAG='latest'
 if [ -n "$DOCKERX_INSTALL_TAG" ]; then
 	# Use from argument or environment variable
-	INSTALL_TAG="$DOCKERX_INSTALL_TAG"
+	if
+		[ "$DOCKERX_INSTALL_TAG" = 'HEAD' ] || [ "$DOCKERX_INSTALL_TAG" = 'head' ] ||
+		[ "$DOCKERX_INSTALL_TAG" = '.' ] || [ "$DOCKERX_INSTALL_TAG" = '-' ]
+	then
+		INSTALL_TAG='HEAD'
+	else
+		INSTALL_TAG="$DOCKERX_INSTALL_TAG"
+	fi
+fi
+
+if [ ! -d "$INSTALL_DIR" ]; then
+	echo "Error: Install directory '$INSTALL_DIR' does not exist." >&2
+	exit 1
 fi
 
 # Check that docker is installed

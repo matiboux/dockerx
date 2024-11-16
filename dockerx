@@ -365,7 +365,6 @@ if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
 	exit ${ERROR_CODE:-0}
 fi
 
-# Function to get latest version
 get_latest_version() {
 	# Syntax: '"tag_name": "v1.0.0",'
 	LATEST_VERSION_JSON=$(
@@ -374,29 +373,31 @@ get_latest_version() {
 	)
 
 	if [ -n "$LATEST_VERSION_JSON" ]; then
+		# Extract version from matched string
+		# Remove `"tag_name": "` (13 characters) and `",` (2 characters)
 		if [ "$(uname -s)" = 'Darwin' ]; then
 			# MacOS
-			LATEST_VERSION="${LATEST_VERSION_JSON:14:$((${#LATEST_VERSION_JSON}-14-2))}"
+			LATEST_VERSION="${LATEST_VERSION_JSON:13:$((${#LATEST_VERSION_JSON}-13-2))}"
 		else
 			# Linux
-			LATEST_VERSION=$(expr substr "$LATEST_VERSION_JSON" $(expr 1 + 14) $(expr length "$LATEST_VERSION_JSON" - 14 - 2))
+			LATEST_VERSION=$(expr substr "$LATEST_VERSION_JSON" $(expr 1 + 13) $(expr length "$LATEST_VERSION_JSON" - 13 - 2))
 		fi
 
 		echo "$LATEST_VERSION"
 	fi
 }
 
-if [ "$PRINT_VERSION" = true ]; then
+if [ "$DOCKERX_PRINT_VERSION" = 'true' ]; then
+	# Print version & exit
 
-	# Print version and exit
-	if [ "$QUIET" = false ]; then
+	if [ "$QUIET" = 'false' ]; then
 		echo "DockerX (v$VERSION) - https://github.com/matiboux/dockerx"
 
-		if [ "$DRY_RUN" = false ]; then
+		if [ "$DRY_RUN" = 'false' ]; then
 			LATEST_VERSION=$(get_latest_version)
 			if [ -z "$LATEST_VERSION" ]; then
-				echo 'Warning: Could not determine latest version.' >&2
-			elif [ "$VERSION" != "$LATEST_VERSION" ]; then
+				echo 'Notice: Failed to get DockerX latest version.' >&2
+			elif [ "$VERSION" != "${LATEST_VERSION#v}" ]; then
 				echo "Notice: DockerX is not up to date, latest version is $LATEST_VERSION!" >&2
 			fi
 		fi
@@ -405,7 +406,8 @@ if [ "$PRINT_VERSION" = true ]; then
 		echo "v$VERSION"
 	fi
 
-	exit 0
+	exit ${ERROR_CODE:-0}
+
 fi
 
 if [ "$UPDATE" = true ]; then

@@ -1,5 +1,8 @@
 # DockerX
 
+![GitHub Release](https://img.shields.io/github/v/release/matiboux/dockerx)
+[![Check CI](https://github.com/matiboux/dockerx/actions/workflows/check.yml/badge.svg)](https://github.com/matiboux/dockerx/actions/workflows/check.yml)
+
 Wrapper for running docker programs & docker shell environments.
 
 

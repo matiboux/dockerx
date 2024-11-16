@@ -187,8 +187,8 @@ while true; do
 			done
 			# Shift '--' separator from arguments
 			shift
-			# Save parsed docker options
-			DOCKERX_DOCKER_OPTIONS="$PARSE_OPTIONS"
+			# Save parsed docker options, remove leading space
+			DOCKERX_DOCKER_OPTIONS="${PARSE_OPTIONS# }"
 		fi
 
 		if [ "$#" -le 0 ]; then

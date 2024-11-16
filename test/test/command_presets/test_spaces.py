@@ -8,7 +8,7 @@ def test_space(file = __file__):
 		)
 		# Default is to run the image's default command
 		dockerx.assert_context_error(
-			b'Error: Unknown command preset \'@yes sir\'\n'
+			b'Error: Unknown docker command preset \'@yes sir\'\n'
 		)
 
 def test_escaped_space(file = __file__):

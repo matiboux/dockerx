@@ -298,6 +298,21 @@ if [ -n "$DOCKERX_COMMAND_ARGS" ]; then
 fi
 
 if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
+
+	if [ "$UPDATE" = 'true' ]; then
+		# Print update help & exit
+		echo "Usage: $0 --update [options] [tag]"
+		echo ''
+		echo 'Options:'
+		echo '  -h, --help         Print this help message'
+		echo '  -i, --install-dir  Set installation directory'
+		echo "    (defaults to directory '$(dirname "$0")')"
+		echo ''
+		echo 'Arguments:'
+		echo '  tag  DockerX tag/version to install (defaults to HEAD)'
+		exit ${ERROR_CODE:-0}
+	fi
+
 	# Print help & exit
 	echo 'Usage:'
 	echo "  $0 [options] <image> [ [...docker_options] -- ] [...command]"

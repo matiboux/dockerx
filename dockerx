@@ -365,6 +365,14 @@ if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
 	exit ${ERROR_CODE:-0}
 fi
 
+if [ "$DOCKERX_PRINT_HELP_PRESET" = 'true' ]; then
+	# Print docker command preset help & exit
+	echo "Use $0 --help for full help"
+	echo 'DockerX command presets:'
+	echo '  $, @sh  Run a `sh` shell in the container'
+	exit 0
+fi
+
 get_latest_version() {
 	# Syntax: '"tag_name": "v1.0.0",'
 	LATEST_VERSION_JSON=$(
@@ -694,14 +702,6 @@ if [ $# -gt 0 ]; then
 
 		esac
 	fi
-fi
-
-if [ "$PRINT_COMMAND_PRESET_HELP" = true ]; then
-	# Print command presets help and exit
-	echo "Use $0 --help for full help"
-	echo 'DockerX command presets:'
-	echo '  $, @sh  Run a `sh` shell in the container'
-	exit 0
 fi
 
 if [ -n "$COMMAND" ]; then

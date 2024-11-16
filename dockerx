@@ -407,13 +407,31 @@ if [ "$DOCKERX_PRINT_VERSION" = 'true' ]; then
 	fi
 
 	exit ${ERROR_CODE:-0}
-
 fi
 
-if [ "$UPDATE" = true ]; then
-	# Update DockerX and exit
-	echo 'Error: Update not implemented yet.' >&2
-	exit 1
+if [ "$UPDATE" = 'true' ]; then
+	# Update DockerX & exit
+
+	INSTALL_TAG_ARG=''
+	if [ -n "$INSTALL_TAG" ]; then
+		INSTALL_TAG_ARG=" \"$INSTALL_TAG\""
+	fi
+
+	if [ "$QUIET" = 'false' ]; then
+		# Print install script command
+		if [ "$DOCKERX_FIRST_NEWLINE" != 'false' ]; then
+			echo ''
+		fi
+		echo "> curl -fsSL \"https://raw.githubusercontent.com/matiboux/dockerx/HEAD/install.sh\" | /bin/sh -s -- --install-dir \"${INSTALL_DIR}\"${INSTALL_TAG_ARG}"
+		echo ''
+	fi
+
+	if [ "$DRY_RUN" = 'false' ]; then
+		# Run install script command
+		exec sh -c "curl -fsSL \"https://raw.githubusercontent.com/matiboux/dockerx/HEAD/install.sh\" | /bin/sh -s -- --install-dir \"${INSTALL_DIR}\"${INSTALL_TAG_ARG}"
+	fi
+
+	exit ${ERROR_CODE:-0}
 fi
 
 # Get dockerx context path file

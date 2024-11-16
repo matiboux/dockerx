@@ -197,7 +197,10 @@ while true; do
 		fi
 
 		# Parse docker command preset
-		if [ "$(echo "$1" | cut -c1)" = '@' ]; then
+		if
+			[ "$1" = '$' ] ||
+			[ "$(echo "$1" | cut -c1)" = '@' ]
+		then
 			if [ "$1" = '@' ]; then
 				# Print docker command preset help
 				DOCKERX_PRINT_HELP_PRESET='true'
@@ -287,12 +290,6 @@ if [ -n "$DOCKERX_INSTALL_DIR" ]; then
 	INSTALL_DIR="$DOCKERX_INSTALL_DIR"
 fi
 
-INSTALL_TAG=''
-if [ -n "$DOCKERX_INSTALL_TAG" ]; then
-	# Use from argument or environment variable
-	INSTALL_TAG="$DOCKERX_INSTALL_TAG"
-fi
-
 CONTEXT_GET=''
 if [ -n "$DOCKERX_CONTEXT_GET" ]; then
 	# Use from argument or environment variable
@@ -309,6 +306,36 @@ CONTEXT_NEW_PATH=''
 if [ -n "$DOCKERX_CONTEXT_NEW_PATH" ]; then
 	# Use from argument or environment variable
 	CONTEXT_NEW_PATH="$DOCKERX_CONTEXT_NEW_PATH"
+fi
+
+INSTALL_TAG=''
+if [ -n "$DOCKERX_INSTALL_TAG" ]; then
+	# Use from argument or environment variable
+	INSTALL_TAG="$DOCKERX_INSTALL_TAG"
+fi
+
+RUN_DOCKERC='false'
+if [ -n "$DOCKERX_RUN_DOCKERC" ]; then
+	# Use from argument or environment variable
+	RUN_DOCKERC="$DOCKERX_RUN_DOCKERC"
+fi
+
+IMAGE=''
+if [ -n "$DOCKERX_IMAGE" ]; then
+	# Use from argument or environment variable
+	IMAGE="$DOCKERX_IMAGE"
+fi
+
+DOCKER_OPTIONS=''
+if [ -n "$DOCKERX_DOCKER_OPTIONS" ]; then
+	# Use from argument or environment variable
+	DOCKER_OPTIONS="$DOCKERX_DOCKER_OPTIONS"
+fi
+
+DOCKER_PRESET=''
+if [ -n "$DOCKERX_DOCKER_PRESET" ]; then
+	# Use from argument or environment variable
+	DOCKER_PRESET="$DOCKERX_DOCKER_PRESET"
 fi
 
 COMMAND_ARGS=''
@@ -474,7 +501,8 @@ else
 	CONTEXT_PATH=''
 fi
 
-if [ "$CHECK_PARENT_CONTEXT" = 'true' ] &&
+if
+	[ "$CHECK_PARENT_CONTEXT" = 'true' ] &&
 	[ -d "$CONTEXT_PATH" ] &&
 	echo "$(pwd)" | grep -qv "^$(echo "$CONTEXT_PATH" | sed 's/[\/]\?$//')"
 then
@@ -499,6 +527,7 @@ if [ -z "$CONTEXT_PATH" ] || [ ! -d "$CONTEXT_PATH" ]; then
 		echo "Warning: Context path '$CONTEXT_PATH' not found, using current directory" >&2
 	fi
 
+	# Use current directory as context path
 	CONTEXT_PATH_SOURCE='DEFAULT'
 	CONTEXT_PATH="$(pwd)"
 fi
@@ -563,37 +592,12 @@ if [ "$CONTEXT_SET" = true ]; then
 	exit 0
 fi
 
-# Get image
-if [ $# -eq 0 ] || [ -z "$1" ]; then
-	echo 'Error: No image specified' >&2
-	exit 1
-fi
-
-DOCKER_IMAGE="$1"
-shift
-
-if [ "$DOCKER_IMAGE" = 'dockerc' ]; then
+if [ "$RUN_DOCKERC" = 'true' ]; then
 	# Run dockerc command with following arguments
 
-	# Get arguments
-	ARGS=''
-	if [ $# -gt 0 ]; then
-		for ARG in "$@"; do
-
-			if [ -z "$ARG" ]; then
-				# Skip empty arguments
-				continue
-			fi
-
-			if [ "$(echo "$ARG" | grep "[ '\"\$\`;*&#<>|]")" ]; then
-				# Escape argument with spaces or special shell characters
-				# Replace single quotes with escaped single quotes
-				ARG="'$(echo "$ARG" | sed "s/'/'\"'\"'/g")'"
-			fi
-
-			ARGS="$ARGS $ARG"
-
-		done
+	# Format variables with leading space
+	if [ -n "$COMMAND_ARGS" ]; then
+		COMMAND_ARGS=" $COMMAND_ARGS"
 	fi
 
 	if [ "$QUIET" = false ]; then
@@ -601,139 +605,54 @@ if [ "$DOCKER_IMAGE" = 'dockerc' ]; then
 		if [ "$DOCKERX_FIRST_NEWLINE" != 'false' ]; then
 			echo ''
 		fi
-		echo "> cd '$CONTEXT_PATH'"
-		echo "> dockerc$ARGS"
+		echo "> cd '${CONTEXT_PATH}'"
+		echo "> dockerc${COMMAND_ARGS}"
 		echo ''
 	fi
 
 	if [ "$DRY_RUN" = false ]; then
 		# Run dockerc command
 		export DOCKERC_FIRST_NEWLINE='false'
-		exec sh -c "cd \"$CONTEXT_PATH\" && dockerc$ARGS"
+		exec sh -c "cd \"${CONTEXT_PATH}\" && dockerc${COMMAND_ARGS}"
 	fi
 
 	exit 0
 fi
 
-# Get docker options
-DOCKER_OPTIONS=''
-DOCKER_OPTIONS_COUNT=0
-FOUND_DOCKER_OPTIONS=false
-if [ $# -gt 0 ]; then
-	for ARG in "$@"; do
-
-		if [ -z "$ARG" ]; then
-			# Skip empty arguments
-			continue
-		fi
-
-		if [ "$ARG" = '--' ]; then
-			# Found docker options separator
-			FOUND_DOCKER_OPTIONS=true
-			break
-		fi
-
-		if [ "$(echo "$ARG" | grep "[ '\"\$\`;*&#<>|]")" ]; then
-			# Escape argument with spaces or special shell characters
-			# Replace single quotes with escaped single quotes
-			ARG="'$(echo "$ARG" | sed "s/'/'\"'\"'/g")'"
-		fi
-
-		DOCKER_OPTIONS="$DOCKER_OPTIONS $ARG"
-		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT + 1))
-
-	done
-fi
-
-if [ "$FOUND_DOCKER_OPTIONS" = true ]; then
-	# Docker options found
-	while [ $DOCKER_OPTIONS_COUNT -gt 0 ]; do
-		# Remove docker options from arguments
-		shift
-		DOCKER_OPTIONS_COUNT=$((DOCKER_OPTIONS_COUNT - 1))
-	done
-	# Remove '--' separator from arguments
-	shift
-else
-	# Docker options not found
-	# Arguments are commands, not options
-	DOCKER_OPTIONS=''
-	DOCKER_OPTIONS_COUNT=0
-fi
-
 # Prepend DockerX docker options
-DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir$DOCKER_OPTIONS"
+DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir $DOCKER_OPTIONS"
 
-# Get command
-PRINT_COMMAND_PRESET_HELP='false'
-COMMAND=''
-if [ $# -gt 0 ]; then
-	# Check for arguments preset
-	COMMAND_PRESET=''
-	if [ "$1" = '@' ]; then
-		PRINT_COMMAND_PRESET_HELP='true'
-		shift
-	elif [ "$1" = '$' ]; then
-		COMMAND_PRESET="@sh"
-		shift
-	elif [ "$(echo "$1" | cut -c1)" = '@' ]; then
-		if [ "$(echo "$1" | cut -c2)" = '@' ]; then
-			# Escape command preset
-			COMMAND="${1#?}"
-			shift
-		else
-			COMMAND_PRESET="$1"
-			shift
-		fi
+# Handle docker command preset
+DOCKER_ARGS=''
+if [ -n "$DOCKER_PRESET" ]; then
+
+	case "$DOCKER_PRESET" in
+
+		'@sh' )
+			DOCKER_ARGS='sh'
+			;;
+		'@$' )
+			DOCKER_ARGS='sh'
+			;;
+		'$' )
+			DOCKER_ARGS='sh'
+			;;
+
+	esac
+
+	if [ -z "$DOCKER_ARGS" ]; then
+		echo "Error: Unknown docker command preset '$DOCKER_PRESET'" >&2
+		exit 1
 	fi
 
-	if [ -n "$COMMAND_PRESET" ]; then
-		# Parse command preset
-		case "${COMMAND_PRESET#?}" in
-
-			'sh' )
-				COMMAND='sh'
-				;;
-
-			*)
-				echo "Error: Unknown command preset '$COMMAND_PRESET'" >&2
-				exit 1
-				;;
-
-		esac
-	fi
 fi
 
-if [ -n "$COMMAND" ]; then
-	if [ "$(echo "$COMMAND" | grep "[ '\"\$\`;*&#<>|]")" ]; then
-		# Escape argument with spaces or special shell characters
-		# Replace single quotes with escaped single quotes
-		COMMAND="'$(echo "$COMMAND" | sed "s/'/'\"'\"'/g")'"
-	fi
-
-	# Add leading space
-	COMMAND=" $COMMAND"
+# Format variables with leading space
+if [ -n "$DOCKER_ARGS" ]; then
+	DOCKER_ARGS=" $DOCKER_ARGS"
 fi
-
-# Get arguments
-ARGS=''
-if [ $# -gt 0 ]; then
-	for ARG in "$@"; do
-
-		if [ -z "$ARG" ]; then
-			# Skip empty arguments
-			continue
-		fi
-
-		if [ "$(echo "$ARG" | grep "[ '\"\$\`;*&#<>|]")" ]; then
-			# Escape argument with spaces or special shell characters
-			# Replace single quotes with escaped single quotes
-			ARG="'$(echo "$ARG" | sed "s/'/'\"'\"'/g")'"
-		fi
-
-		ARGS="$ARGS $ARG"
-
-	done
+if [ -n "$COMMAND_ARGS" ]; then
+	COMMAND_ARGS=" $COMMAND_ARGS"
 fi
 
 if [ "$QUIET" = false ]; then
@@ -741,11 +660,11 @@ if [ "$QUIET" = false ]; then
 	if [ "$DOCKERX_FIRST_NEWLINE" != 'false' ]; then
 		echo ''
 	fi
-	echo "> docker run $DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
+	echo "> docker run ${DOCKER_OPTIONS} ${IMAGE}${DOCKER_ARGS}${COMMAND_ARGS}"
 	echo ''
 fi
 
 if [ "$DRY_RUN" = false ]; then
 	# Run docker command
-	exec sh -c "docker run $DOCKER_OPTIONS $DOCKER_IMAGE$COMMAND$ARGS"
+	exec sh -c "docker run ${DOCKER_OPTIONS} ${IMAGE}${DOCKER_ARGS}${COMMAND_ARGS}"
 fi

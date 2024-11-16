@@ -112,39 +112,6 @@ while true; do
 
 done
 
-if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
-	# Print help & exit
-	echo 'Usage:'
-	echo "  $0 [options] <image> [ [...docker_options] -- ] [...command]"
-	echo "  $0 [options] <image> [ [...docker_options] -- ] [@preset] [...args]"
-	echo "  $0 --set-context [path]"
-	echo ''
-	echo 'DockerX will run the specified docker image in the context of your'
-	echo 'working directory. '
-	echo ''
-	echo 'Arguments:'
-	echo '  options: DockerX options'
-	echo '  image: Docker image to run'
-	echo '  docker_options: Options passed to docker run command'
-	echo '  command: Command to run in the container'
-	echo '  @preset: DockerX preset (shortcut for a command)'
-	echo '  args: Arguments appended to the preset command'
-	echo ''
-	echo 'Arguments details:'
-	echo '  options:'
-	echo '    -h, --help           Print this help and exit'
-	echo '    -v, --version        Print version and exit'
-	echo '    --update             Update DockerX and exit'
-	echo '    -g, --get-context    Get the DockerX context path'
-	echo '    -c, --set-context    Set the DockerX context path'
-	echo '    -r, --reset-context  Unset the DockerX context path'
-	echo '    -n, --dry-run        Dry run, print docker command without running it'
-	echo '    -q, --quiet          Quiet, do not print docker command'
-	echo '  @preset: One of the following:'
-	echo '    $, @sh  Run a `sh` shell in the container'
-	exit ${ERROR_CODE:-0}
-fi
-
 DRY_RUN='false'
 if [ -n "$DOCKERX_DRY_RUN" ]; then
 	# Use from argument or environment variable
@@ -197,6 +164,39 @@ COMMAND_ARGS=''
 if [ -n "$DOCKERX_COMMAND_ARGS" ]; then
 	# Use from argument or environment variable
 	COMMAND_ARGS="$DOCKERX_COMMAND_ARGS"
+fi
+
+if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
+	# Print help & exit
+	echo 'Usage:'
+	echo "  $0 [options] <image> [ [...docker_options] -- ] [...command]"
+	echo "  $0 [options] <image> [ [...docker_options] -- ] [@preset] [...args]"
+	echo "  $0 --set-context [path]"
+	echo ''
+	echo 'DockerX will run the specified docker image in the context of your'
+	echo 'working directory. '
+	echo ''
+	echo 'Arguments:'
+	echo '  options: DockerX options'
+	echo '  image: Docker image to run'
+	echo '  docker_options: Options passed to docker run command'
+	echo '  command: Command to run in the container'
+	echo '  @preset: DockerX preset (shortcut for a command)'
+	echo '  args: Arguments appended to the preset command'
+	echo ''
+	echo 'Arguments details:'
+	echo '  options:'
+	echo '    -h, --help           Print this help and exit'
+	echo '    -v, --version        Print version and exit'
+	echo '    --update             Update DockerX and exit'
+	echo '    -g, --get-context    Get the DockerX context path'
+	echo '    -c, --set-context    Set the DockerX context path'
+	echo '    -r, --reset-context  Unset the DockerX context path'
+	echo '    -n, --dry-run        Dry run, print docker command without running it'
+	echo '    -q, --quiet          Quiet, do not print docker command'
+	echo '  @preset: One of the following:'
+	echo '    $, @sh  Run a `sh` shell in the container'
+	exit ${ERROR_CODE:-0}
 fi
 
 # Function to get latest version

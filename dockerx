@@ -107,7 +107,136 @@ while true; do
 		break
 	fi
 
-	# TODO
+	# Parse first mandatory positional argument
+
+	if [ "$#" -le 0 ] || [ -z "$1" ]; then
+		echo 'Error: No image specified.' >&2
+		DOCKERX_PRINT_HELP='true'
+		ERROR_CODE=1
+		break
+	fi
+
+	if [ "$1" = '?' ]; then
+		# Print general help
+		DOCKERX_PRINT_HELP='true'
+		shift
+		# Stop parsing arguments
+		break
+	fi
+
+	if [ "$1" = 'dockerc' ]; then
+		# Run dockerc command
+		DOCKERX_RUN_DOCKERC='true'
+		shift
+
+	elif [ "$DOCKERX_UPDATE" = 'true' ]; then
+		# Parse update install tag argument
+		DOCKERX_INSTALL_TAG="$1"
+		shift
+
+	else
+		# Parse image argument
+		DOCKERX_IMAGE="$1"
+		shift
+	fi
+
+	if [ -z "$DOCKERX_IMAGE" ]; then
+		# Stop parsing arguments
+		break
+	fi
+
+	# Check for optional positional arguments
+
+	if [ "$#" -le 0 ]; then
+		# No more arguments
+		break
+	fi
+
+	# Parse docker options
+
+	PARSE_OPTIONS=''
+	PARSE_OPTIONS_COUNT=0
+	PARSE_OPTIONS_FOUND='false'
+
+	for ARG in "$@"; do
+
+		if [ "$ARG" = '--' ]; then
+			# Found docker options separator
+			PARSE_OPTIONS_FOUND=true
+			break
+		fi
+
+		if [ -z "$ARG" ]; then
+			# Empty argument
+			ARG="''"
+		elif [ "$(echo "$ARG" | grep "[ '\"\$\`;*&#<>|]")" ]; then
+			# Escape argument with spaces or special shell characters
+			# Replace single quotes with escaped single quotes
+			ARG="'$(echo "$ARG" | sed "s/'/'\"'\"'/g")'"
+		fi
+
+		PARSE_OPTIONS="$PARSE_OPTIONS $ARG"
+		PARSE_OPTIONS_COUNT=$((PARSE_OPTIONS_COUNT + 1))
+
+	done
+
+	if [ "$PARSE_OPTIONS_FOUND" = 'true' ]; then
+		# Docker options found
+		while [ "$PARSE_OPTIONS_COUNT" -gt 0 ]; do
+			# Shift docker options from arguments
+			shift
+			PARSE_OPTIONS_COUNT=$((PARSE_OPTIONS_COUNT - 1))
+		done
+		# Shift '--' separator from arguments
+		shift
+		# Save parsed docker options
+		DOCKERX_DOCKER_OPTIONS="$PARSE_OPTIONS"
+	fi
+
+	if [ "$#" -le 0 ]; then
+		# No more arguments
+		break
+	fi
+
+	# Parse docker command preset
+	if [ "$(echo "$1" | cut -c1)" = '@' ]; then
+		if [ "$1" = '@' ]; then
+			# Print docker command preset help
+			DOCKERX_PRINT_HELP_PRESET='true'
+			# Stop parsing arguments
+			break
+		fi
+
+		DOCKERX_DOCKER_PRESET="$1"
+		shift
+	fi
+
+	# Check for optional positional arguments
+	if [ "$#" -le 0 ]; then
+		# No more arguments
+		break
+	fi
+
+	# Parse trailing positional arguments
+	# Parse command args
+	DOCKERX_COMMAND_ARGS=''
+	for ARG in "$@"; do
+
+		if [ -z "$ARG" ]; then
+			# Empty argument
+			ARG="''"
+		elif [ "$(echo "$ARG" | grep "[ '\"\$\`;*&#<>|]")" ]; then
+			# Escape argument with spaces or special shell characters
+			# Replace single quotes with escaped single quotes
+			ARG="'$(echo "$ARG" | sed "s/'/'\"'\"'/g")'"
+		fi
+
+		DOCKERX_COMMAND_ARGS="$DOCKERX_COMMAND_ARGS $ARG"
+
+	done
+
+	# Remove leading space
+	DOCKERX_COMMAND_ARGS="${DOCKERX_COMMAND_ARGS# }"
 
 	# Stop parsing arguments
 	break

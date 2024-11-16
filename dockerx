@@ -629,23 +629,34 @@ DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir$DOCKER_OPTIONS"
 DOCKER_ARGS=''
 if [ -n "$DOCKER_PRESET" ]; then
 
-	case "$DOCKER_PRESET" in
+	if [ "$(echo "$DOCKER_PRESET" | cut -c1-2)" = '@@' ]; then
+		# Escape pattern: Remove '@' prefix & use in docker command
+		DOCKER_ARGS="${DOCKER_PRESET#@}"
+		if [ "$(echo "$DOCKER_ARGS" | grep "[ '\"\$\`;*&#<>|]")" ]; then
+			# Escape argument with spaces or special shell characters
+			# Replace single quotes with escaped single quotes
+			DOCKER_ARGS="'$(echo "$DOCKER_ARGS" | sed "s/'/'\"'\"'/g")'"
+		fi
 
-		'@sh' )
-			DOCKER_ARGS='sh'
-			;;
-		'@$' )
-			DOCKER_ARGS='sh'
-			;;
-		'$' )
-			DOCKER_ARGS='sh'
-			;;
+	else
+		case "$DOCKER_PRESET" in
 
-	esac
+			'@sh' )
+				DOCKER_ARGS='sh'
+				;;
+			'@$' )
+				DOCKER_ARGS='sh'
+				;;
+			'$' )
+				DOCKER_ARGS='sh'
+				;;
 
-	if [ -z "$DOCKER_ARGS" ]; then
-		echo "Error: Unknown docker command preset '$DOCKER_PRESET'" >&2
-		exit 1
+		esac
+
+		if [ -z "$DOCKER_ARGS" ]; then
+			echo "Error: Unknown docker command preset '$DOCKER_PRESET'" >&2
+			exit 1
+		fi
 	fi
 
 fi

@@ -9,72 +9,111 @@
 
 VERSION='0.1.0'
 
-# Default options
-PRINT_HELP=false
-PRINT_VERSION=false
-UPDATE=false
-CONTEXT_GET=false
-CONTEXT_SET=false
-CONTEXT_NEW_PATH=''
-DRY_RUN=false
-QUIET=false
+ERROR_CODE=''
 
-# Parse options
+# Parse arguments
+# Dummy while loop to allow breaking
 while true; do
-	case "$1" in
-		'--help' | '-h' )
-			# Print help
-			PRINT_HELP=true
-			shift
-			;;
-		'--version' | '-v' )
-			# Print version
-			PRINT_VERSION=true
-			shift
-			;;
-		'--update' )
-			# Update DockerX
-			UPDATE=true
-			shift
-			;;
-		'--get-context' | '-g' | '-c' )
-			# Get context path
-			CONTEXT_GET=true
-			shift
-			;;
-		'--set-context' | '-s' | '-C' )
-			# Set context path
-			CONTEXT_SET=true
-			shift
-			if [ $# -gt 0 ] && [ "$(echo "$1" | cut -c1)" != '-' ]; then
-				CONTEXT_NEW_PATH="$1"
+
+	# Parse options arguments
+	while [ "$#" -gt 0 ]; do
+
+		case "$1" in
+
+			'--help' | '-h' )
+				# Print general help
+				DOCKERX_PRINT_HELP='true'
 				shift
-			fi
-			;;
-		'--reset-context' | '-r' )
-			# Unset context path
-			CONTEXT_SET=true
-			CONTEXT_NEW_PATH='null'
-			shift
-			;;
-		'--dry-run' | '-n' )
-			# Dry run, print docker command without running it
-			DRY_RUN=true
-			shift
-			;;
-		'--quiet' | '-q' )
-			# Quiet, do not print docker command
-			QUIET=true
-			shift
-			;;
-		* )
-			break
-			;;
-	esac
+				;;
+
+			'--version' | '-v' )
+				# Print version
+				DOCKERX_PRINT_VERSION='true'
+				shift
+				;;
+
+			'--dry-run' | '-n' )
+				# Dry run, print docker command without running it
+				DOCKERX_DRY_RUN='true'
+				shift
+				;;
+
+			'--quiet' | '-q' )
+				# Quiet, do not print docker command
+				DOCKERX_QUIET='true'
+				shift
+				;;
+
+			'--update' )
+				# Update DockerX
+				DOCKERX_UPDATE='true'
+				shift
+				;;
+
+			'--install-dir' | '-i' )
+				shift
+				# Check for installation directory argument
+				if [ -z "$1" ]; then
+					echo 'Error: Missing installation directory.' >&2
+					DOCKERX_PRINT_HELP='true'
+					DOCKERX_UPDATE='true'
+					ERROR_CODE=1
+					break
+				fi
+				# Set installation directory
+				DOCKERX_INSTALL_DIR="$1"
+				shift
+				;;
+
+			'--get-context' | '-g' | '-c' )
+				# Get context path
+				DOCKERX_CONTEXT_GET=true
+				shift
+				;;
+
+			'--set-context' | '-s' | '-C' )
+				# Set context path
+				DOCKERX_CONTEXT_SET=true
+				shift
+				if [ $# -gt 0 ] && [ "$(echo "$1" | cut -c1)" != '-' ]; then
+					DOCKERX_CONTEXT_NEW_PATH="$1"
+					shift
+				fi
+				;;
+
+			'--reset-context' | '-r' )
+				# Unset context path
+				DOCKERX_CONTEXT_SET=true
+				DOCKERX_CONTEXT_NEW_PATH='null'
+				shift
+				;;
+
+			* )
+				break
+				;;
+
+		esac
+
+	done
+
+	if
+		[ "$DOCKERX_PRINT_HELP" = 'true' ] ||
+		[ "$DOCKERX_PRINT_VERSION" = 'true' ] ||
+		[ "$DOCKERX_UPDATE" = 'true' ]
+	then
+		# Stop parsing arguments
+		break
+	fi
+
+	# TODO
+
+	# Stop parsing arguments
+	break
+
 done
 
-if [ "$PRINT_HELP" = true ]; then
-	# Print help and exit
+if [ "$DOCKERX_PRINT_HELP" = 'true' ]; then
+	# Print help & exit
 	echo 'Usage:'
 	echo "  $0 [options] <image> [ [...docker_options] -- ] [...command]"
 	echo "  $0 [options] <image> [ [...docker_options] -- ] [@preset] [...args]"
@@ -103,7 +142,61 @@ if [ "$PRINT_HELP" = true ]; then
 	echo '    -q, --quiet          Quiet, do not print docker command'
 	echo '  @preset: One of the following:'
 	echo '    $, @sh  Run a `sh` shell in the container'
-	exit 0
+	exit ${ERROR_CODE:-0}
+fi
+
+DRY_RUN='false'
+if [ -n "$DOCKERX_DRY_RUN" ]; then
+	# Use from argument or environment variable
+	DRY_RUN="$DOCKERX_DRY_RUN"
+fi
+
+QUIET='false'
+if [ -n "$DOCKERX_QUIET" ]; then
+	# Use from argument or environment variable
+	QUIET="$DOCKERX_QUIET"
+fi
+
+UPDATE='false'
+if [ -n "$DOCKERX_UPDATE" ]; then
+	# Use from argument or environment variable
+	UPDATE="$DOCKERX_UPDATE"
+fi
+
+INSTALL_DIR="$(dirname "$0")"
+if [ -n "$DOCKERX_INSTALL_DIR" ]; then
+	# Use from argument or environment variable
+	INSTALL_DIR="$DOCKERX_INSTALL_DIR"
+fi
+
+INSTALL_TAG=''
+if [ -n "$DOCKERX_INSTALL_TAG" ]; then
+	# Use from argument or environment variable
+	INSTALL_TAG="$DOCKERX_INSTALL_TAG"
+fi
+
+CONTEXT_GET=''
+if [ -n "$DOCKERX_CONTEXT_GET" ]; then
+	# Use from argument or environment variable
+	CONTEXT_GET="$DOCKERX_CONTEXT_GET"
+fi
+
+CONTEXT_SET=''
+if [ -n "$DOCKERX_CONTEXT_SET" ]; then
+	# Use from argument or environment variable
+	CONTEXT_SET="$DOCKERX_CONTEXT_SET"
+fi
+
+CONTEXT_NEW_PATH=''
+if [ -n "$DOCKERX_CONTEXT_NEW_PATH" ]; then
+	# Use from argument or environment variable
+	CONTEXT_NEW_PATH="$DOCKERX_CONTEXT_NEW_PATH"
+fi
+
+COMMAND_ARGS=''
+if [ -n "$DOCKERX_COMMAND_ARGS" ]; then
+	# Use from argument or environment variable
+	COMMAND_ARGS="$DOCKERX_COMMAND_ARGS"
 fi
 
 # Function to get latest version

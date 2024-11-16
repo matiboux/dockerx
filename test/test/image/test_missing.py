@@ -1,3 +1,5 @@
+import re
+
 from test.src.TestDirContext import TestDirContext
 from test.src.format_dockerx_stdout import format_dockerx_stdout
 
@@ -7,7 +9,8 @@ def test_missing(file = __file__):
 			'-n',
 		)
 		dockerx.assert_context_error(
-			b'Error: No image specified\n',
+			b'Error: No image specified.\n',
+			stdout = re.compile('^Usage:', re.MULTILINE),
 		)
 
 def test_empty(file = __file__):
@@ -16,5 +19,6 @@ def test_empty(file = __file__):
 			'-n', '',
 		)
 		dockerx.assert_context_error(
-			b'Error: No image specified\n',
+			b'Error: No image specified.\n',
+			stdout = re.compile('^Usage:', re.MULTILINE),
 		)

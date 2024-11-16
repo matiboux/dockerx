@@ -99,7 +99,6 @@ while true; do
 	if
 		[ "$DOCKERX_PRINT_HELP" = 'true' ] ||
 		[ "$DOCKERX_PRINT_VERSION" = 'true' ] ||
-		[ "$DOCKERX_UPDATE" = 'true' ] ||
 		[ "$DOCKERX_CONTEXT_GET" = 'true' ] ||
 		[ "$DOCKERX_CONTEXT_SET" = 'true' ]
 	then

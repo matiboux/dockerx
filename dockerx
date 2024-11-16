@@ -620,7 +620,10 @@ if [ "$RUN_DOCKERC" = 'true' ]; then
 fi
 
 # Prepend DockerX docker options
-DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir $DOCKER_OPTIONS"
+if [ -n "$DOCKER_OPTIONS" ]; then
+	DOCKER_OPTIONS=" $DOCKER_OPTIONS"
+fi
+DOCKER_OPTIONS="-it --rm -v '$CONTEXT_PATH:/workdir' -w /workdir$DOCKER_OPTIONS"
 
 # Handle docker command preset
 DOCKER_ARGS=''

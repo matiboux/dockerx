@@ -153,15 +153,17 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-curl -fsSL "https://raw.githubusercontent.com/matiboux/dockerx/$INSTALL_TAG/dockerx" -o "$INSTALL_DIR/dockerx"
-if [ $? -ne 0 ]; then
-	echo 'Error: DockerX installation failed.' >&2
+curl -fsSL "https://raw.githubusercontent.com/matiboux/dockerx/$INSTALL_TAG/dockerx" 2>/dev/null \
+	-o "$INSTALL_DIR/dockerx"
+CURL_CODE=$?
+if [ "$CURL_CODE" -ne 0 ]; then
+	echo "Error: Failed to download DockerX ($INSTALL_TAG) in '$INSTALL_DIR' (curl error $CURL_CODE)." >&2
 	exit 1
 fi
 
 chmod +x "$INSTALL_DIR/dockerx"
 if [ $? -ne 0 ]; then
-	echo 'Error: Failed to add execute permission.' >&2
+	echo 'Error: Failed to add execute permission to DockerX.' >&2
 	exit 1
 fi
 
